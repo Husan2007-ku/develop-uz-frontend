@@ -8,7 +8,7 @@ const C = {
   accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
 }
 
-const API = 'http://localhost:8001'
+const API = 'https://develop-uz-api.onrender.com'
 
 const STATUS_STYLE = {
   new: { label: 'Yangi', color: C.accent, bg: 'rgba(0,245,255,0.1)' },

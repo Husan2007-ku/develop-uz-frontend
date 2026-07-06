@@ -29,7 +29,7 @@ export default function EssaysPage() {
   const TELEGRAM_ID = 7311844154
 
   useEffect(() => {
-    fetch('http://localhost:8000/essays/?limit=20')
+    fetch('https://develop-uz-api.onrender.com/essays/?limit=20')
       .then(r => r.json())
       .then(d => { setEssays(d.essays || []); setLoading(false) })
       .catch(() => setLoading(false))
@@ -41,12 +41,12 @@ export default function EssaysPage() {
     setShowAnalysis(false)
     setHighlights([])
     try {
-      const res = await fetch(`http://localhost:8000/essays/${essay.id}`)
+      const res = await fetch(`https://develop-uz-api.onrender.com/essays/${essay.id}`)
       const data = await res.json()
       setSelected(data)
       setHighlights(data.highlights || [])
       const notesRes = await fetch(
-        `http://localhost:8000/essays/${essay.id}/notes/${TELEGRAM_ID}`
+        `https://develop-uz-api.onrender.com/essays/${essay.id}/notes/${TELEGRAM_ID}`
       )
       const notes = await notesRes.json()
       setVocabNotes(notes.vocab_notes || '')
@@ -61,7 +61,7 @@ export default function EssaysPage() {
     if (!selected) return
     try {
       await fetch(
-        `http://localhost:8000/essays/${selected.id}/notes/${TELEGRAM_ID}`,
+        `https://develop-uz-api.onrender.com/essays/${selected.id}/notes/${TELEGRAM_ID}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },

@@ -8,7 +8,7 @@ const C = {
   accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
 }
 
-const API = 'http://localhost:8001'
+const API = 'https://develop-uz-api.onrender.com'
 
 const HL_STYLE = {
   collocation: { bg: 'rgba(245,158,11,0.25)', color: '#F59E0B', label: 'Collocation', border: 'rgba(245,158,11,0.4)' },

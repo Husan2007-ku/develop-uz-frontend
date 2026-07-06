@@ -26,7 +26,7 @@ export default function StudyPage() {
   async function loadWords() {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:8000/vocabulary/?limit=10')
+      const res = await fetch('https://develop-uz-api.onrender.com/vocabulary/?limit=10')
       const data = await res.json()
       const w = data.words || []
       setWords(w)

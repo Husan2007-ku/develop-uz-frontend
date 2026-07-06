@@ -31,7 +31,7 @@ export default function VocabularyPage() {
   const [selected, setSelected] = useState(null)
 
   useEffect(() => {
-    fetch('http://localhost:8000/vocabulary/?limit=50')
+    fetch('https://develop-uz-api.onrender.com/vocabulary/?limit=50')
       .then(r => r.json())
       .then(d => { setWords(d.words || []); setLoading(false) })
       .catch(() => setLoading(false))
