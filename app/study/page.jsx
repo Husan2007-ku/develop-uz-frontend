@@ -235,56 +235,90 @@ export default function StudyPage() {
           </div>
         )}
 
-        {/* CLOZE */}
-        {mode === 'cloze' && !loading && !finished && word && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-              <button onClick={() => setMode(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 13, cursor: 'pointer' }}>← Orqaga</button>
-              <span style={{ fontSize: 12, color: C.text2 }}>{current + 1} / {words.length}</span>
-            </div>
-            <div style={{ ...card, marginBottom: 16 }}>
-              <div style={{ fontSize: 11, color: C.text2, fontFamily: 'monospace', marginBottom: 12 }}>
-                {word.cefr_level} · Bo'sh joyni to'ldiring
-              </div>
-              {word.example_1 ? (
-                <p style={{ fontSize: 15, color: C.text, lineHeight: 1.8, marginBottom: 16 }}>
-                  {word.example_1.replace(new RegExp(word.word, 'gi'), '________')}
-                </p>
-              ) : (
-                <p style={{ fontSize: 13, color: C.text2, fontStyle: 'italic', marginBottom: 16 }}>Misol gap mavjud emas</p>
-              )}
-              {!clozeShown ? (
-                <button onClick={() => setClozeShown(true)} style={{
-                  padding: '8px 20px', borderRadius: 8, border: 'none',
-                  background: `rgba(149,76,233,0.2)`, color: '#9b5de5',
-                  fontSize: 12, fontWeight: 500, cursor: 'pointer'
-                }}>💡 Javobni ko'rish</button>
-              ) : (
-                <div style={{
-                  background: 'rgba(149,76,233,0.1)', border: '0.5px solid rgba(149,76,233,0.3)',
-                  borderRadius: 8, padding: '10px 14px'
-                }}>
-                  <div style={{ fontSize: 20, fontWeight: 500, color: '#9b5de5', marginBottom: 3 }}>{word.word}</div>
-                  <div style={{ fontSize: 12, color: C.text2 }}>🇺🇿 {word.translation_uz}</div>
-                </div>
-              )}
-            </div>
-            {clozeShown && (
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => nextWord(false)} style={{
-                  flex: 1, padding: 14, borderRadius: 10,
-                  background: 'rgba(239,68,68,0.1)', border: '0.5px solid rgba(239,68,68,0.3)',
-                  color: '#ef4444', fontSize: 14, fontWeight: 500, cursor: 'pointer'
-                }}>❌ Bilmadim</button>
-                <button onClick={() => nextWord(true)} style={{
-                  flex: 1, padding: 14, borderRadius: 10,
-                  background: `${C.green}15`, border: `0.5px solid ${C.green}40`,
-                  color: C.green, fontSize: 14, fontWeight: 500, cursor: 'pointer'
-                }}>✅ Bildim</button>
-              </div>
-            )}
+{/* CLOZE TEST */}
+{mode === 'cloze' && !loading && !finished && word && (
+  <div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+      <button onClick={() => setMode(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 13, cursor: 'pointer' }}>← Orqaga</button>
+      <span style={{ fontSize: 12, color: C.text2 }}>{current + 1} / {words.length}</span>
+    </div>
+
+    <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: 20, marginBottom: 16 }}>
+      <div style={{ fontSize: 11, color: C.text2, fontFamily: 'monospace', marginBottom: 12 }}>
+        {word.cefr_level} · Bo'sh joyni to'ldiring
+      </div>
+
+      {word.example_1 ? (
+        <p style={{ fontSize: 15, color: C.text, lineHeight: 1.8, marginBottom: 16 }}>
+          {word.example_1.replace(new RegExp(word.word, 'gi'), '________')}
+        </p>
+      ) : (
+        <p style={{ fontSize: 13, color: C.text2, fontStyle: 'italic', marginBottom: 16 }}>Misol gap mavjud emas</p>
+      )}
+
+      {/* Yozish maydoni */}
+      {!clozeShown && (
+        <div style={{ marginBottom: 12 }}>
+          <input
+            type="text"
+            placeholder="Javobingizni yozing..."
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                const val = e.target.value.trim().toLowerCase()
+                const correct = word.word.toLowerCase()
+                setClozeShown(true)
+                if (val === correct) {
+                  nextWord(true)
+                }
+              }
+            }}
+            style={{
+              width: '100%', padding: '10px 14px', borderRadius: 8,
+              border: `0.5px solid ${C.border2}`, background: C.bg,
+              color: C.text, fontSize: 14, outline: 'none', fontFamily: 'inherit'
+            }}
+            autoFocus
+          />
+          <div style={{ fontSize: 11, color: C.text2, marginTop: 6 }}>
+            Enter bosing — javobni tekshirish
           </div>
-        )}
+        </div>
+      )}
+
+      {!clozeShown ? (
+        <button onClick={() => setClozeShown(true)} style={{
+          padding: '8px 20px', borderRadius: 8,
+          border: `0.5px solid rgba(149,76,233,0.4)`,
+          background: 'rgba(149,76,233,0.1)', color: '#9b5de5',
+          fontSize: 12, fontWeight: 500, cursor: 'pointer'
+        }}>💡 Javobni ko'rish</button>
+      ) : (
+        <div style={{
+          background: 'rgba(149,76,233,0.1)', border: '0.5px solid rgba(149,76,233,0.3)',
+          borderRadius: 8, padding: '10px 14px'
+        }}>
+          <p style={{ fontSize: 20, fontWeight: 500, color: '#9b5de5', marginBottom: 3 }}>{word.word}</p>
+          <p style={{ fontSize: 12, color: C.text2 }}>🇺🇿 {word.translation_uz}</p>
+        </div>
+      )}
+    </div>
+
+    {clozeShown && (
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button onClick={() => nextWord(false)} style={{
+          flex: 1, padding: 14, borderRadius: 10,
+          background: 'rgba(239,68,68,0.1)', border: '0.5px solid rgba(239,68,68,0.3)',
+          color: '#ef4444', fontSize: 14, fontWeight: 500, cursor: 'pointer'
+        }}>❌ Noto'g'ri</button>
+        <button onClick={() => nextWord(true)} style={{
+          flex: 1, padding: 14, borderRadius: 10,
+          background: `${C.green}15`, border: `0.5px solid ${C.green}40`,
+          color: C.green, fontSize: 14, fontWeight: 500, cursor: 'pointer'
+        }}>✅ To'g'ri</button>
+      </div>
+    )}
+  </div>
+)}
 
         {/* QUIZ */}
         {mode === 'quiz' && !loading && !finished && word && (

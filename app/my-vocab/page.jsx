@@ -107,10 +107,10 @@ export default function MyVocabPage() {
     }
   }
 
-  const filtered = words.filter(w => {
-    if (filterStatus !== 'all') return true // status filteri keyinroq
-    return true
-  })
+const filtered = words.filter(w => {
+  if (filterStatus === 'all') return true
+  return (w.status || 'new') === filterStatus
+})
 
   const card = {
     background: C.bg2,
