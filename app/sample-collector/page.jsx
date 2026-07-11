@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 
 const C = {
   bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
@@ -9,6 +10,7 @@ const C = {
 }
 
 const API = 'https://develop-uz-api.onrender.com'
+const TELEGRAM_ID = 7311844154
 
 const HL_STYLE = {
   collocation: { bg: 'rgba(245,158,11,0.25)', color: '#F59E0B', label: 'Collocation', border: 'rgba(245,158,11,0.4)' },
@@ -40,6 +42,8 @@ export default function SampleCollectorPage() {
   const [activeFilter, setActiveFilter] = useState('all')
   const [selectedHL, setSelectedHL] = useState(null)
   const [savedWords, setSavedWords] = useState([])
+  const [savingId, setSavingId] = useState(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   async function analyzeText() {
     if (text.trim().length < 50) return
@@ -47,6 +51,7 @@ export default function SampleCollectorPage() {
     setHighlights([])
     setAnalyzed(false)
     setSelectedHL(null)
+    setSavedWords([])
     try {
       const res = await fetch(`${API}/ai/sample/highlight`, {
         method: 'POST',
@@ -62,9 +67,49 @@ export default function SampleCollectorPage() {
     setLoading(false)
   }
 
-  function saveHighlight(hl) {
-    if (savedWords.find(w => w.text === hl.text)) return
-    setSavedWords(prev => [...prev, hl])
+  async function saveToVocab(hl) {
+    const key = hl.text
+    if (savedWords.find(w => w.text === key)) return
+    setSavingId(key)
+
+    try {
+      // 1. Vocabulary da qidirish
+      const searchRes = await fetch(`${API}/vocabulary/search/${encodeURIComponent(hl.text)}`)
+      const searchData = await searchRes.json()
+
+      if (searchData.results && searchData.results.length > 0) {
+        // Topilsa — user vocabulary ga qo'shish
+        const word = searchData.results[0]
+        await fetch(`${API}/vocabulary/user/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            telegram_id: TELEGRAM_ID,
+            vocab_id: word.id,
+            source: 'sample'
+          })
+        })
+      }
+      // Topilmasa ham — local state ga qo'shamiz
+      setSavedWords(prev => [...prev, { ...hl, saved: true }])
+    } catch (e) {
+      console.error(e)
+      setSavedWords(prev => [...prev, { ...hl, saved: false }])
+    }
+    setSavingId(null)
+  }
+
+  async function saveAllToVocab() {
+    if (savedWords.length === 0) return
+    setSaveSuccess(false)
+
+    for (const hl of highlights) {
+      if (!savedWords.find(w => w.text === hl.text)) {
+        await saveToVocab(hl)
+      }
+    }
+    setSaveSuccess(true)
+    setTimeout(() => setSaveSuccess(false), 3000)
   }
 
   function renderHighlighted() {
@@ -89,13 +134,18 @@ export default function SampleCollectorPage() {
         result.push(<span key={`t${i}`}>{text.slice(lastIdx, idx)}</span>)
       }
       const style = HL_STYLE[hl.type] || HL_STYLE.c1_vocab
+      const isSaved = savedWords.find(w => w.text === hl.text)
       result.push(
         <span key={`h${i}`}
           onClick={() => setSelectedHL(selectedHL?.text === hl.text ? null : hl)}
           style={{
-            background: style.bg, color: style.color,
-            padding: '1px 4px', borderRadius: 4, cursor: 'pointer',
-            border: `0.5px solid ${selectedHL?.text === hl.text ? style.color : 'transparent'}`,
+            background: style.bg,
+            color: style.color,
+            padding: '1px 4px',
+            borderRadius: 4,
+            cursor: 'pointer',
+            border: `0.5px solid ${selectedHL?.text === hl.text ? style.color : isSaved ? style.color : 'transparent'}`,
+            textDecoration: isSaved ? 'underline' : 'none',
             transition: 'all 0.15s'
           }}
           title={hl.explanation_uz}>
@@ -132,7 +182,6 @@ export default function SampleCollectorPage() {
         {/* Input bosqichi */}
         {!analyzed ? (
           <div>
-            {/* Namuna matnlar */}
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 12, color: C.text2, marginBottom: 8 }}>
                 Namuna matnlardan birini tanlang yoki o'z matnizni yozing:
@@ -157,8 +206,7 @@ export default function SampleCollectorPage() {
                 width: '100%', height: 260, background: C.bg2,
                 border: `0.5px solid ${C.border}`, borderRadius: 12,
                 padding: 16, color: C.text, fontSize: 13, lineHeight: 1.8,
-                resize: 'vertical', outline: 'none', fontFamily: 'inherit',
-                marginBottom: 12
+                resize: 'vertical', outline: 'none', fontFamily: 'inherit', marginBottom: 12
               }}
             />
 
@@ -166,11 +214,7 @@ export default function SampleCollectorPage() {
               <div style={{ display: 'flex', gap: 12 }}>
                 {Object.entries(HL_STYLE).map(([type, style]) => (
                   <span key={type} style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 4, color: C.text2 }}>
-                    <span style={{
-                      display: 'inline-block', width: 10, height: 10,
-                      background: style.bg, borderRadius: 2,
-                      border: `0.5px solid ${style.border}`
-                    }} />
+                    <span style={{ display: 'inline-block', width: 10, height: 10, background: style.bg, borderRadius: 2, border: `0.5px solid ${style.border}` }} />
                     {style.label}
                   </span>
                 ))}
@@ -187,11 +231,11 @@ export default function SampleCollectorPage() {
             </div>
           </div>
         ) : (
-          /* Natija bosqichi */
+          /* Natija */
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={() => { setActiveFilter('all') }} style={{
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <button onClick={() => setActiveFilter('all')} style={{
                   fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
                   border: `0.5px solid ${activeFilter === 'all' ? C.accent : C.border}`,
                   background: activeFilter === 'all' ? `${C.accent}12` : 'transparent',
@@ -210,7 +254,7 @@ export default function SampleCollectorPage() {
                   )
                 })}
               </div>
-              <button onClick={() => { setAnalyzed(false); setHighlights([]); setSelectedHL(null) }} style={{
+              <button onClick={() => { setAnalyzed(false); setHighlights([]); setSelectedHL(null); setSavedWords([]) }} style={{
                 fontSize: 11, padding: '6px 14px', borderRadius: 6, cursor: 'pointer',
                 border: `0.5px solid ${C.border}`, background: 'transparent', color: C.text2,
               }}>← Yangi matn</button>
@@ -219,17 +263,11 @@ export default function SampleCollectorPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
 
               {/* Matn + highlights */}
-              <div style={{
-                background: C.bg2, border: `0.5px solid ${C.border}`,
-                borderRadius: 12, padding: 20
-              }}>
+              <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
                 <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
                   {Object.entries(HL_STYLE).map(([type, style]) => (
                     <span key={type} style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 4, color: C.text2 }}>
-                      <span style={{
-                        display: 'inline-block', width: 8, height: 8,
-                        background: style.bg, borderRadius: 2, border: `0.5px solid ${style.border}`
-                      }} />
+                      <span style={{ display: 'inline-block', width: 8, height: 8, background: style.bg, borderRadius: 2, border: `0.5px solid ${style.border}` }} />
                       {style.label}
                     </span>
                   ))}
@@ -248,7 +286,8 @@ export default function SampleCollectorPage() {
                 {/* Selected highlight detail */}
                 {selectedHL && (
                   <div style={{
-                    background: C.bg2, border: `0.5px solid ${HL_STYLE[selectedHL.type]?.color || C.accent}40`,
+                    background: C.bg2,
+                    border: `0.5px solid ${HL_STYLE[selectedHL.type]?.color || C.accent}40`,
                     borderRadius: 12, padding: 16
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -258,13 +297,9 @@ export default function SampleCollectorPage() {
                         color: HL_STYLE[selectedHL.type]?.color,
                         border: `0.5px solid ${HL_STYLE[selectedHL.type]?.border}`
                       }}>{HL_STYLE[selectedHL.type]?.label}</span>
-                      <button onClick={() => setSelectedHL(null)} style={{
-                        background: 'none', border: 'none', color: C.text2, fontSize: 16, cursor: 'pointer'
-                      }}>×</button>
+                      <button onClick={() => setSelectedHL(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 16, cursor: 'pointer' }}>×</button>
                     </div>
-                    <div style={{ fontSize: 18, fontWeight: 500, color: C.text, marginBottom: 6 }}>
-                      {selectedHL.text}
-                    </div>
+                    <div style={{ fontSize: 18, fontWeight: 500, color: C.text, marginBottom: 6 }}>{selectedHL.text}</div>
                     {selectedHL.explanation_uz && (
                       <div style={{ fontSize: 13, color: C.text2, marginBottom: 10, lineHeight: 1.6 }}>
                         🇺🇿 {selectedHL.explanation_uz}
@@ -275,43 +310,34 @@ export default function SampleCollectorPage() {
                         fontSize: 12, color: C.accent, padding: '8px 12px',
                         background: `${C.accent}08`, borderRadius: 8, marginBottom: 12,
                         fontFamily: 'monospace'
-                      }}>
-                        {selectedHL.how_to_use}
-                      </div>
+                      }}>{selectedHL.how_to_use}</div>
                     )}
                     <button
-                      onClick={() => saveHighlight(selectedHL)}
-                      disabled={savedWords.find(w => w.text === selectedHL.text)}
+                      onClick={() => saveToVocab(selectedHL)}
+                      disabled={!!savedWords.find(w => w.text === selectedHL.text) || savingId === selectedHL.text}
                       style={{
-                        width: '100%', padding: '8px', borderRadius: 8,
-                        background: savedWords.find(w => w.text === selectedHL.text)
-                          ? `${C.green}15` : `${C.accent}12`,
-                        border: `0.5px solid ${savedWords.find(w => w.text === selectedHL.text)
-                          ? `${C.green}40` : C.border2}`,
+                        width: '100%', padding: '8px', borderRadius: 8, cursor: 'pointer',
+                        background: savedWords.find(w => w.text === selectedHL.text) ? `${C.green}15` : `${C.accent}12`,
+                        border: `0.5px solid ${savedWords.find(w => w.text === selectedHL.text) ? `${C.green}40` : C.border2}`,
                         color: savedWords.find(w => w.text === selectedHL.text) ? C.green : C.accent,
-                        fontSize: 12, cursor: 'pointer'
+                        fontSize: 12,
                       }}>
-                      {savedWords.find(w => w.text === selectedHL.text)
-                        ? '✅ Saqlandi' : '+ Vocabularyga qo\'shish'}
+                      {savingId === selectedHL.text ? '⏳ Saqlanmoqda...' :
+                        savedWords.find(w => w.text === selectedHL.text) ? '✅ Saqlandi' :
+                          "+ Vocabularyga qo'shish"}
                     </button>
                   </div>
                 )}
 
                 {/* Highlights list */}
-                <div style={{
-                  background: C.bg2, border: `0.5px solid ${C.border}`,
-                  borderRadius: 12, overflow: 'hidden', flex: 1
-                }}>
-                  <div style={{
-                    padding: '10px 14px', borderBottom: `0.5px solid ${C.border}`,
-                    fontSize: 12, fontWeight: 500, color: C.text2
-                  }}>
+                <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', flex: 1 }}>
+                  <div style={{ padding: '10px 14px', borderBottom: `0.5px solid ${C.border}`, fontSize: 12, fontWeight: 500, color: C.text2 }}>
                     Topilgan iboralar ({filteredHL.length})
                   </div>
-                  <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                  <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                     {filteredHL.map((hl, i) => {
                       const style = HL_STYLE[hl.type] || HL_STYLE.c1_vocab
-                      const isSaved = savedWords.find(w => w.text === hl.text)
+                      const isSaved = !!savedWords.find(w => w.text === hl.text)
                       return (
                         <div key={i}
                           onClick={() => setSelectedHL(selectedHL?.text === hl.text ? null : hl)}
@@ -322,17 +348,10 @@ export default function SampleCollectorPage() {
                             transition: 'all 0.15s'
                           }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                            <span style={{ fontSize: 13, fontWeight: 500, color: style.color }}>
-                              {hl.text}
-                            </span>
+                            <span style={{ fontSize: 13, fontWeight: 500, color: style.color }}>{hl.text}</span>
                             <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                              {isSaved && (
-                                <span style={{ fontSize: 10, color: C.green }}>✅</span>
-                              )}
-                              <span style={{
-                                fontSize: 9, padding: '1px 5px', borderRadius: 3,
-                                background: style.bg, color: style.color
-                              }}>{style.label}</span>
+                              {isSaved && <span style={{ fontSize: 10, color: C.green }}>✅</span>}
+                              <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: style.bg, color: style.color }}>{style.label}</span>
                             </div>
                           </div>
                           <div style={{ fontSize: 11, color: C.text2 }}>{hl.explanation_uz}</div>
@@ -342,31 +361,46 @@ export default function SampleCollectorPage() {
                   </div>
                 </div>
 
-                {/* Saved words */}
-                {savedWords.length > 0 && (
-                  <div style={{
-                    background: `${C.green}08`, border: `0.5px solid ${C.green}30`,
-                    borderRadius: 12, padding: 14
-                  }}>
-                    <div style={{ fontSize: 12, color: C.green, marginBottom: 10 }}>
-                      ✅ Saqlangan ({savedWords.length} ta)
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                      {savedWords.map((w, i) => (
-                        <span key={i} style={{
-                          fontSize: 11, padding: '3px 8px', borderRadius: 4,
-                          background: `${C.green}12`, color: C.green,
-                          border: `0.5px solid ${C.green}30`, fontFamily: 'monospace'
-                        }}>{w.text}</span>
-                      ))}
-                    </div>
-                    <button style={{
-                      width: '100%', marginTop: 10, padding: '8px', borderRadius: 8,
-                      background: `${C.green}15`, border: `0.5px solid ${C.green}40`,
-                      color: C.green, fontSize: 11, cursor: 'pointer'
-                    }}>📚 Shaxsiy vocabularyga qo'shish</button>
+                {/* Saqlangan words panel */}
+                <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
+                  <div style={{ fontSize: 12, color: C.text2, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>💾 Saqlangan ({savedWords.length} ta)</span>
+                    {savedWords.length > 0 && (
+                      <Link href="/my-vocab" style={{ fontSize: 11, color: C.accent, textDecoration: 'none' }}>
+                        Ko'rish →
+                      </Link>
+                    )}
                   </div>
-                )}
+
+                  {savedWords.length === 0 ? (
+                    <div style={{ fontSize: 11, color: C.text2, textAlign: 'center', padding: '12px 0' }}>
+                      Iborani bosib saqlang
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
+                        {savedWords.map((w, i) => (
+                          <span key={i} style={{
+                            fontSize: 11, padding: '3px 8px', borderRadius: 4,
+                            background: `${C.green}12`, color: C.green,
+                            border: `0.5px solid ${C.green}30`, fontFamily: 'monospace'
+                          }}>{w.text}</span>
+                        ))}
+                      </div>
+                      <button
+                        onClick={saveAllToVocab}
+                        style={{
+                          width: '100%', padding: '9px', borderRadius: 8,
+                          background: saveSuccess ? `${C.green}15` : `${C.accent}12`,
+                          border: `0.5px solid ${saveSuccess ? `${C.green}40` : C.border2}`,
+                          color: saveSuccess ? C.green : C.accent,
+                          fontSize: 12, fontWeight: 500, cursor: 'pointer'
+                        }}>
+                        {saveSuccess ? '✅ Hammasi saqlandi!' : '📚 Barchasini vocabularyga qo\'shish'}
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>

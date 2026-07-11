@@ -1,10 +1,26 @@
 'use client'
 import { useState, useEffect } from 'react'
 
+const C = {
+  bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
+  border: 'rgba(0,245,255,0.15)', border2: 'rgba(0,245,255,0.3)',
+  text: '#e2e8f0', text2: '#94a3b8',
+  accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
+}
+
+const API = 'https://develop-uz-api.onrender.com'
+const TELEGRAM_ID = 7311844154
+
 const BAND_COLOR = (score) => {
-  if (score >= 8) return 'bg-green-500/20 text-green-400 border-green-500/30'
-  if (score >= 7) return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-  return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+  if (score >= 8) return 'rgba(147,233,190,0.2)'
+  if (score >= 7) return 'rgba(0,245,255,0.15)'
+  return 'rgba(245,158,11,0.2)'
+}
+
+const BAND_TEXT = (score) => {
+  if (score >= 8) return '#93E9BE'
+  if (score >= 7) return '#00F5FF'
+  return '#F59E0B'
 }
 
 const TYPE_LABELS = {
@@ -15,21 +31,28 @@ const TYPE_LABELS = {
   reasoning: 'Reasoning',
 }
 
+const HL_COLORS = {
+  collocation: { bg: 'rgba(245,158,11,0.25)', color: '#F59E0B', label: 'Collocation' },
+  idiom: { bg: 'rgba(147,233,190,0.25)', color: '#93E9BE', label: 'Idiom' },
+  c1_vocab: { bg: 'rgba(0,245,255,0.2)', color: '#00F5FF', label: 'C1' },
+  c2_vocab: { bg: 'rgba(149,76,233,0.25)', color: '#9b5de5', label: 'C2' },
+}
+
 export default function EssaysPage() {
   const [essays, setEssays] = useState([])
   const [selected, setSelected] = useState(null)
   const [highlights, setHighlights] = useState([])
   const [showAnalysis, setShowAnalysis] = useState(false)
+  const [analyzingHL, setAnalyzingHL] = useState(false)
   const [vocabNotes, setVocabNotes] = useState('')
   const [grammarNotes, setGrammarNotes] = useState('')
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
-
-  const TELEGRAM_ID = 7311844154
+  const [selectedHL, setSelectedHL] = useState(null)
 
   useEffect(() => {
-    fetch('https://develop-uz-api.onrender.com/essays/?limit=20')
+    fetch(`${API}/essays/?limit=20`)
       .then(r => r.json())
       .then(d => { setEssays(d.essays || []); setLoading(false) })
       .catch(() => setLoading(false))
@@ -40,14 +63,13 @@ export default function EssaysPage() {
     setSelected(null)
     setShowAnalysis(false)
     setHighlights([])
+    setSelectedHL(null)
     try {
-      const res = await fetch(`https://develop-uz-api.onrender.com/essays/${essay.id}`)
+      const res = await fetch(`${API}/essays/${essay.id}`)
       const data = await res.json()
       setSelected(data)
       setHighlights(data.highlights || [])
-      const notesRes = await fetch(
-        `https://develop-uz-api.onrender.com/essays/${essay.id}/notes/${TELEGRAM_ID}`
-      )
+      const notesRes = await fetch(`${API}/essays/${essay.id}/notes/${TELEGRAM_ID}`)
       const notes = await notesRes.json()
       setVocabNotes(notes.vocab_notes || '')
       setGrammarNotes(notes.grammar_notes || '')
@@ -57,235 +79,280 @@ export default function EssaysPage() {
     }
   }
 
+  async function toggleAnalysis() {
+    if (showAnalysis) {
+      setShowAnalysis(false)
+      return
+    }
+
+    // Highlights yo'q bo'lsa AI dan olamiz
+    if (highlights.length === 0 && selected) {
+      setAnalyzingHL(true)
+      try {
+        const res = await fetch(`${API}/ai/highlights/detect`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: selected.content })
+        })
+        const data = await res.json()
+        setHighlights(data.highlights || [])
+      } catch (e) {
+        console.error(e)
+      }
+      setAnalyzingHL(false)
+    }
+    setShowAnalysis(true)
+  }
+
   async function saveNotes() {
     if (!selected) return
     try {
-      await fetch(
-        `https://develop-uz-api.onrender.com/essays/${selected.id}/notes/${TELEGRAM_ID}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            vocab_notes: vocabNotes,
-            grammar_notes: grammarNotes
-          })
-        }
-      )
+      await fetch(`${API}/essays/${selected.id}/notes/${TELEGRAM_ID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vocab_notes: vocabNotes, grammar_notes: grammarNotes })
+      })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  const HL_COLORS = {
-    collocation: 'bg-yellow-200 text-yellow-900',
-    idiom: 'bg-green-200 text-green-900',
-    c1_vocab: 'bg-blue-200 text-blue-900',
-    c2_vocab: 'bg-purple-200 text-purple-900',
+    } catch (e) { console.error(e) }
   }
 
   function renderContent(content) {
     if (!showAnalysis || highlights.length === 0) {
       return content.split('\n\n').map((p, i) => (
-        <p key={i} className="text-gray-200 leading-relaxed mb-5">{p}</p>
+        <p key={i} style={{ marginBottom: 16, lineHeight: 1.9, color: C.text }}>{p}</p>
       ))
     }
+
     let result = []
     let lastIdx = 0
-    const sorted = [...highlights].sort((a, b) => a.start_index - b.start_index)
+    const sorted = [...highlights].sort((a, b) => (a.start_index || 0) - (b.start_index || 0))
+
     sorted.forEach((h, i) => {
-      if (h.start_index > lastIdx) {
-        result.push(<span key={`t${i}`}>{content.slice(lastIdx, h.start_index)}</span>)
+      const idx = h.start_index !== undefined
+        ? h.start_index
+        : content.indexOf(h.text, lastIdx)
+
+      if (idx === -1 || idx < lastIdx) return
+
+      if (idx > lastIdx) {
+        result.push(<span key={`t${i}`}>{content.slice(lastIdx, idx)}</span>)
       }
+
+      const hl = HL_COLORS[h.highlight_type || h.type] || HL_COLORS.c1_vocab
+      const end = h.end_index !== undefined ? h.end_index : idx + h.text.length
+
       result.push(
         <span key={`h${i}`}
-          className={`${HL_COLORS[h.highlight_type] || 'bg-gray-200'} px-1 rounded cursor-pointer`}
-          title={h.explanation_uz || ''}>
-          {content.slice(h.start_index, h.end_index)}
+          onClick={() => setSelectedHL(selectedHL?.text === h.text ? null : h)}
+          style={{
+            background: hl.bg, color: hl.color,
+            padding: '1px 3px', borderRadius: 3, cursor: 'pointer',
+            border: `0.5px solid ${selectedHL?.text === h.text ? hl.color : 'transparent'}`,
+          }}
+          title={h.explanation_uz || h.how_to_use || ''}>
+          {content.slice(idx, end)}
         </span>
       )
-      lastIdx = h.end_index
+      lastIdx = end
     })
+
     if (lastIdx < content.length) {
       result.push(<span key="last">{content.slice(lastIdx)}</span>)
     }
-    return <p className="text-gray-200 leading-relaxed">{result}</p>
+
+    return <p style={{ lineHeight: 1.9, fontSize: 14, color: C.text }}>{result}</p>
   }
 
-  const filtered = filter === 'all'
-    ? essays
-    : essays.filter(e => e.question_type === filter)
+  const filtered = filter === 'all' ? essays : essays.filter(e => e.question_type === filter)
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
-      <div className="bg-gray-900 border-b border-white/10">
-        <div className="max-w-[1400px] mx-auto px-6 py-6">
-          <h1 className="text-3xl font-black mb-1">Writing Essays</h1>
-          <p className="text-gray-400 text-sm">
-            Band 6-9 gacha real IELTS Writing Task 2 essaylar
-          </p>
-        </div>
+    <main style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
+      <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '14px 24px' }}>
+        <h1 style={{ fontSize: 20, fontWeight: 500, color: C.accent, marginBottom: 2 }}>Writing Essays</h1>
+        <p style={{ fontSize: 12, color: C.text2 }}>Band 6-9 gacha real IELTS Writing Task 2 essaylar</p>
       </div>
 
-      <div
-        className="max-w-[1400px] mx-auto px-6 py-6 flex gap-4"
-        style={{ height: 'calc(100vh - 120px)' }}
-      >
-        {/* PANEL 1 */}
-        <div className="w-72 flex-shrink-0 bg-gray-900 border border-white/10 rounded-2xl flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-white/10">
-            <div className="text-sm font-bold mb-3">Essay kutubxonasi</div>
-            <div className="flex gap-1 flex-wrap">
+      <div style={{ display: 'flex', gap: 0, height: 'calc(100vh - 110px)' }}>
+
+        {/* PANEL 1 — Essay ro'yxati */}
+        <div style={{
+          width: 260, flexShrink: 0, borderRight: `1px solid ${C.border}`,
+          display: 'flex', flexDirection: 'column', background: C.bg
+        }}>
+          <div style={{ padding: '12px 14px', borderBottom: `0.5px solid ${C.border}` }}>
+            <div style={{ fontSize: 12, fontWeight: 500, color: C.text, marginBottom: 8 }}>Essay kutubxonasi</div>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               {['all', 'evaluation', 'reasoning', 'comparison'].map(f => (
-                <button key={f} onClick={() => setFilter(f)}
-                  className={`text-xs px-2 py-1 rounded-lg transition ${
-                    filter === f
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                  }`}>
-                  {f === 'all' ? 'Barchasi' : TYPE_LABELS[f] || f}
-                </button>
+                <button key={f} onClick={() => setFilter(f)} style={{
+                  fontSize: 10, padding: '3px 8px', borderRadius: 6, cursor: 'pointer',
+                  border: `0.5px solid ${filter === f ? C.accent : C.border}`,
+                  background: filter === f ? `${C.accent}12` : 'transparent',
+                  color: filter === f ? C.accent : C.text2,
+                }}>{f === 'all' ? 'Barchasi' : TYPE_LABELS[f] || f}</button>
               ))}
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
             {loading ? (
-              <div className="text-center py-10 text-gray-500 text-sm">Yuklanmoqda...</div>
+              <div style={{ textAlign: 'center', padding: '30px 0', color: C.text2, fontSize: 12 }}>Yuklanmoqda...</div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-10 text-gray-500 text-sm">Essay topilmadi</div>
+              <div style={{ textAlign: 'center', padding: '30px 0', color: C.text2, fontSize: 12 }}>Essay topilmadi</div>
             ) : filtered.map(essay => (
-              <div key={essay.id} onClick={() => selectEssay(essay)}
-                className={`p-3 rounded-xl cursor-pointer transition border ${
-                  selected?.id === essay.id
-                    ? 'bg-blue-600/20 border-blue-500/50'
-                    : 'bg-white/5 border-white/5 hover:border-white/20 hover:bg-white/10'
-                }`}>
-                <div className="flex gap-1 mb-2 flex-wrap">
-                  <span className={`text-xs px-2 py-0.5 rounded-full border font-mono ${BAND_COLOR(essay.band_score)}`}>
-                    {essay.band_score}
-                  </span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-gray-300">
+              <div key={essay.id} onClick={() => selectEssay(essay)} style={{
+                padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
+                marginBottom: 6, transition: 'all 0.15s',
+                background: selected?.id === essay.id ? `${C.accent}10` : 'transparent',
+                border: `0.5px solid ${selected?.id === essay.id ? C.accent : C.border}`,
+              }}>
+                <div style={{ display: 'flex', gap: 4, marginBottom: 5, flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: 10, padding: '2px 6px', borderRadius: 4, fontFamily: 'monospace',
+                    background: BAND_COLOR(essay.band_score), color: BAND_TEXT(essay.band_score)
+                  }}>{essay.band_score}</span>
+                  <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', color: C.text2 }}>
                     {TYPE_LABELS[essay.question_type] || essay.question_type}
                   </span>
                 </div>
-                <p className="text-sm font-medium leading-snug line-clamp-2">{essay.title}</p>
-                <p className="text-xs text-gray-500 mt-1">{essay.word_count} so'z</p>
+                <div style={{ fontSize: 12, fontWeight: 500, color: C.text, lineHeight: 1.4, marginBottom: 3 }}>
+                  {essay.title}
+                </div>
+                <div style={{ fontSize: 10, color: C.text2 }}>{essay.word_count} so'z</div>
               </div>
             ))}
           </div>
-          <div className="p-3 border-t border-white/10">
-            <span className="text-xs text-gray-500">Bepul: 10 ta</span>
+
+          <div style={{ padding: '8px 14px', borderTop: `0.5px solid ${C.border}`, fontSize: 10, color: C.text2 }}>
+            Bepul: 10 ta · 🔒 Premium: ko'proq
           </div>
         </div>
 
-        {/* PANEL 2 */}
-        <div className="flex-1 bg-gray-900 border border-white/10 rounded-2xl flex flex-col overflow-hidden">
+        {/* PANEL 2 — Essay matni */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: C.bg }}>
           {!selected ? (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <div className="text-5xl mb-4">📝</div>
-                <p>Chap tomondagi essayni bosing</p>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.text2 }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.2 }}>📝</div>
+                <div style={{ fontSize: 13 }}>Chap tomondagi essayni bosing</div>
               </div>
             </div>
           ) : (
             <>
-              <div className="p-4 border-b border-white/10 flex items-start justify-between gap-4">
+              {/* Essay header */}
+              <div style={{ padding: '12px 20px', borderBottom: `0.5px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
                 <div>
-                  <h2 className="font-bold text-lg leading-snug mb-2">{selected.title}</h2>
-                  <div className="flex gap-2 flex-wrap">
-                    <span className={`text-xs px-2 py-1 rounded-full border font-mono ${BAND_COLOR(selected.band_score)}`}>
-                      Band {selected.band_score}
-                    </span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-gray-300">
-                      {TYPE_LABELS[selected.question_type] || selected.question_type}
-                    </span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-gray-300">
-                      {selected.word_count} so'z
-                    </span>
+                  <div style={{ fontSize: 15, fontWeight: 500, color: C.text, marginBottom: 6, lineHeight: 1.4 }}>{selected.title}</div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: BAND_COLOR(selected.band_score), color: BAND_TEXT(selected.band_score), fontFamily: 'monospace' }}>Band {selected.band_score}</span>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', color: C.text2 }}>{TYPE_LABELS[selected.question_type] || selected.question_type}</span>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', color: C.text2 }}>{selected.word_count} so'z</span>
                   </div>
                 </div>
-                <button onClick={() => setShowAnalysis(!showAnalysis)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-bold transition ${
-                    showAnalysis
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white/10 hover:bg-white/20 text-gray-300'
-                  }`}>
-                  {showAnalysis ? '✅ Tahlil ON' : '🔍 Tahlil'}
+                <button onClick={toggleAnalysis} disabled={analyzingHL} style={{
+                  flexShrink: 0, padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                  border: `0.5px solid ${showAnalysis ? C.accent : C.border}`,
+                  background: showAnalysis ? `${C.accent}15` : 'transparent',
+                  color: showAnalysis ? C.accent : C.text2,
+                }}>
+                  {analyzingHL ? '⏳ Tahlil...' : showAnalysis ? '✅ Tahlil ON' : '🔍 Tahlil'}
                 </button>
               </div>
 
+              {/* Highlights legend */}
               {showAnalysis && highlights.length > 0 && (
-                <div className="px-4 py-2 bg-white/5 border-b border-white/10 flex gap-4 flex-wrap text-xs">
-                  <span className="flex items-center gap-1">
-                    <span className="bg-yellow-200 text-yellow-900 px-1 rounded">■</span> Collocation
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="bg-green-200 text-green-900 px-1 rounded">■</span> Idiom
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="bg-blue-200 text-blue-900 px-1 rounded">■</span> C1 Vocab
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="bg-purple-200 text-purple-900 px-1 rounded">■</span> C2 Vocab
-                  </span>
+                <div style={{ padding: '6px 20px', borderBottom: `0.5px solid ${C.border}`, display: 'flex', gap: 12, flexWrap: 'wrap', background: 'rgba(0,245,255,0.02)', flexShrink: 0 }}>
+                  {Object.entries(HL_COLORS).map(([type, style]) => (
+                    <span key={type} style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 4, color: C.text2 }}>
+                      <span style={{ display: 'inline-block', width: 8, height: 8, background: style.bg, borderRadius: 2 }} />
+                      {style.label}
+                    </span>
+                  ))}
                 </div>
               )}
 
-              <div className="flex-1 overflow-y-auto p-6">
+              {/* Selected highlight tooltip */}
+              {selectedHL && showAnalysis && (
+                <div style={{ padding: '8px 20px', borderBottom: `0.5px solid ${C.border}`, background: `${HL_COLORS[selectedHL.highlight_type || selectedHL.type]?.color || C.accent}08`, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: HL_COLORS[selectedHL.highlight_type || selectedHL.type]?.color || C.accent }}>
+                        {selectedHL.text}
+                      </span>
+                      {selectedHL.explanation_uz && (
+                        <span style={{ fontSize: 12, color: C.text2, marginLeft: 10 }}>🇺🇿 {selectedHL.explanation_uz}</span>
+                      )}
+                    </div>
+                    <button onClick={() => setSelectedHL(null)} style={{ background: 'none', border: 'none', color: C.text2, cursor: 'pointer', fontSize: 16 }}>×</button>
+                  </div>
+                  {selectedHL.how_to_use && (
+                    <div style={{ fontSize: 11, color: C.accent, fontFamily: 'monospace', marginTop: 4 }}>{selectedHL.how_to_use}</div>
+                  )}
+                </div>
+              )}
+
+              {/* Essay content */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
                 {renderContent(selected.content)}
               </div>
             </>
           )}
         </div>
 
-        {/* PANEL 3 */}
-        <div className="w-72 flex-shrink-0 flex flex-col gap-3">
-          <div className="flex-1 bg-gray-900 border border-white/10 rounded-2xl flex flex-col overflow-hidden">
-            <div className="p-3 border-b border-white/10">
-              <div className="text-sm font-bold">📌 Qaydlarim — Vocabulary</div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                O'zingizga yoqqan so'zlarni yozing
-              </div>
+        {/* PANEL 3 — Qaydlar */}
+        <div style={{ width: 240, flexShrink: 0, borderLeft: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', background: C.bg }}>
+
+          {/* Vocab notes */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderBottom: `0.5px solid ${C.border}` }}>
+            <div style={{ padding: '10px 12px', borderBottom: `0.5px solid ${C.border}`, flexShrink: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 500, color: C.amber }}>📌 Qaydlarim — Vocabulary</div>
+              <div style={{ fontSize: 10, color: C.text2, marginTop: 2 }}>Yoqqan so'zlarni yozing</div>
             </div>
             <textarea
               value={vocabNotes}
               onChange={e => { setVocabNotes(e.target.value); setSaved(false) }}
               placeholder={selected ? "Masalan:\nexacerbate — yomonlashtirmoq\nfoster — rivojlantirmoq" : "Essay tanlang..."}
               disabled={!selected}
-              className="flex-1 bg-transparent p-3 text-sm text-gray-300 placeholder-gray-600 resize-none focus:outline-none"
+              style={{
+                flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                padding: '10px 12px', color: C.text, fontSize: 12,
+                resize: 'none', fontFamily: 'inherit', lineHeight: 1.6
+              }}
             />
           </div>
 
-          <div className="flex-1 bg-gray-900 border border-white/10 rounded-2xl flex flex-col overflow-hidden">
-            <div className="p-3 border-b border-white/10">
-              <div className="text-sm font-bold">📐 Qaydlarim — Grammatika</div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                Yoqqan strukturalarni yozing
-              </div>
+          {/* Grammar notes */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '10px 12px', borderBottom: `0.5px solid ${C.border}`, flexShrink: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 500, color: C.accent }}>📐 Qaydlarim — Grammatika</div>
+              <div style={{ fontSize: 10, color: C.text2, marginTop: 2 }}>Yoqqan strukturalarni yozing</div>
             </div>
             <textarea
               value={grammarNotes}
               onChange={e => { setGrammarNotes(e.target.value); setSaved(false) }}
               placeholder={selected ? "Masalan:\nWhile... , critics argue...\nNot only... but also..." : "Essay tanlang..."}
               disabled={!selected}
-              className="flex-1 bg-transparent p-3 text-sm text-gray-300 placeholder-gray-600 resize-none focus:outline-none"
+              style={{
+                flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                padding: '10px 12px', color: C.text, fontSize: 12,
+                resize: 'none', fontFamily: 'inherit', lineHeight: 1.6
+              }}
             />
           </div>
 
-          <button onClick={saveNotes} disabled={!selected}
-            className={`py-3 rounded-xl font-bold text-sm transition ${
-              saved
-                ? 'bg-green-600 text-white'
-                : selected
-                ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                : 'bg-white/5 text-gray-600 cursor-not-allowed'
-            }`}>
-            {saved ? '✅ Saqlandi!' : '💾 Saqlash'}
-          </button>
-
-          <div className="text-xs text-gray-600 text-center">
-            Saqlangan qaydlar bot orqali eslatiladi
+          {/* Save button */}
+          <div style={{ padding: '10px 12px', borderTop: `0.5px solid ${C.border}`, flexShrink: 0 }}>
+            <button onClick={saveNotes} disabled={!selected} style={{
+              width: '100%', padding: '9px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: selected ? 'pointer' : 'not-allowed',
+              border: `0.5px solid ${saved ? `${C.green}40` : selected ? C.border2 : C.border}`,
+              background: saved ? `${C.green}15` : selected ? `${C.accent}10` : 'rgba(255,255,255,0.02)',
+              color: saved ? C.green : selected ? C.accent : C.text2,
+            }}>
+              {saved ? '✅ Saqlandi!' : '💾 Saqlash'}
+            </button>
+            <div style={{ fontSize: 10, color: C.text2, textAlign: 'center', marginTop: 6 }}>
+              Bot orqali eslatiladi
+            </div>
           </div>
         </div>
       </div>
