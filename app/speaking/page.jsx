@@ -1,12 +1,8 @@
 'use client'
 import { useState } from 'react'
-
-const C = {
-  bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
-  border: 'rgba(0,245,255,0.15)', border2: 'rgba(0,245,255,0.3)',
-  text: '#e2e8f0', text2: '#94a3b8',
-  accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
-}
+import styles from './speaking.module.css'
+import GlassBackground from '@/components/GlassBackground'
+import { IconMic, IconArrowRight, IconStar, IconTrophy, IconCheck, IconEye, IconChart } from '@/components/Icons'
 
 const SPEAKING_DATA = {
   1: [
@@ -185,202 +181,132 @@ export default function SpeakingPage() {
   const questions = SPEAKING_DATA[part] || []
 
   return (
-    <main style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
-      <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '16px 24px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: C.accent, marginBottom: 3 }}>🎤 Speaking Tayyorgarlik</h1>
-        <p style={{ fontSize: 12, color: C.text2 }}>Part 1, 2, 3 uchun namuna javoblar — Band 7 va Band 9 darajasida</p>
-      </div>
+    <div className={styles.wrapper}>
+      <GlassBackground />
+      <div className={styles.inner}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>
+            <span className={styles.titleIcon}><IconMic size={16} /></span>
+            Speaking Tayyorgarlik
+          </h1>
+          <p className={styles.desc}>Part 1, 2, 3 uchun namuna javoblar — Band 7 va Band 9 darajasida</p>
+        </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
-
-        {/* Part tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <div className={styles.partTabs}>
           {[1, 2, 3].map(p => (
-            <button key={p} onClick={() => { setPart(p); setSelectedQ(null) }} style={{
-              padding: '8px 20px', borderRadius: 8, fontSize: 13, cursor: 'pointer',
-              border: `0.5px solid ${part === p ? C.accent : C.border}`,
-              background: part === p ? `${C.accent}15` : 'transparent',
-              color: part === p ? C.accent : C.text2, fontWeight: part === p ? 500 : 400,
-            }}>
+            <button
+              key={p}
+              onClick={() => { setPart(p); setSelectedQ(null) }}
+              className={`${styles.partTab} ${part === p ? styles.partTabActive : ''}`}
+            >
               Part {p}
-              <span style={{ fontSize: 10, marginLeft: 6, color: C.text2 }}>
+              <span className={styles.partTabSub}>
                 {p === 1 ? '(Shaxsiy savollar)' : p === 2 ? '(Cue Card)' : '(Munozara)'}
               </span>
             </button>
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: selectedQ ? '280px 1fr' : '1fr', gap: 16 }}>
-
-          {/* Question list */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className={`${styles.layout} ${selectedQ ? styles.layoutSplit : ''}`}>
+          <div className={styles.qList}>
             {!selectedQ && (
-              <div style={{ fontSize: 12, color: C.text2, marginBottom: 4 }}>
-                {questions.length} ta savol — bosing va namuna javob ko'ring
-              </div>
+              <div className={styles.qListHint}>{questions.length} ta savol — bosing va namuna javob ko&apos;ring</div>
             )}
             {questions.map(q => (
-              <div key={q.id} onClick={() => selectQuestion(q)} style={{
-                background: selectedQ?.id === q.id ? `${C.accent}10` : C.bg2,
-                border: `0.5px solid ${selectedQ?.id === q.id ? C.accent : C.border}`,
-                borderRadius: 10, padding: 14, cursor: 'pointer', transition: 'all 0.15s'
-              }}
-                onMouseEnter={e => { if (selectedQ?.id !== q.id) e.currentTarget.style.borderColor = C.border2 }}
-                onMouseLeave={e => { if (selectedQ?.id !== q.id) e.currentTarget.style.borderColor = C.border }}>
-                <div style={{
-                  display: 'inline-block', fontSize: 10, padding: '2px 8px',
-                  borderRadius: 4, background: `${C.accent}10`, color: C.accent,
-                  fontFamily: 'monospace', marginBottom: 8
-                }}>{q.topic}</div>
-                <div style={{ fontSize: 13, color: C.text, lineHeight: 1.5 }}>{q.question}</div>
+              <div
+                key={q.id}
+                onClick={() => selectQuestion(q)}
+                className={`glassPanel ${styles.qCard} ${selectedQ?.id === q.id ? styles.qCardActive : ''}`}
+              >
+                <div className={styles.qTopic}>{q.topic}</div>
+                <div className={styles.qText}>{q.question}</div>
                 {part === 2 && q.cue_card && (
-                  <div style={{ marginTop: 8 }}>
-                    {q.cue_card.map((c, i) => (
-                      <div key={i} style={{ fontSize: 11, color: C.text2, paddingLeft: 10 }}>• {c}</div>
-                    ))}
+                  <div className={styles.cueList}>
+                    {q.cue_card.map((c, i) => <div key={i} className={styles.cueItem}>• {c}</div>)}
                   </div>
                 )}
               </div>
             ))}
           </div>
 
-          {/* Answer panel */}
           {selectedQ && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-              {/* Band selector */}
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <span style={{ fontSize: 12, color: C.text2 }}>Band darajasi:</span>
+            <div className={styles.answerPanel}>
+              <div className={styles.bandRow}>
+                <span className={styles.bandRowLbl}>Band darajasi:</span>
                 {['band7', 'band9'].map(b => (
-                  <button key={b} onClick={() => { setBandView(b); setShowAnswer(false) }} style={{
-                    padding: '6px 16px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
-                    border: `0.5px solid ${bandView === b ? (b === 'band7' ? C.amber : C.green) : C.border}`,
-                    background: bandView === b ? (b === 'band7' ? `${C.amber}15` : `${C.green}15`) : 'transparent',
-                    color: bandView === b ? (b === 'band7' ? C.amber : C.green) : C.text2,
-                  }}>
-                    {b === 'band7' ? '⭐ Band 7' : '🏆 Band 9'}
+                  <button
+                    key={b}
+                    onClick={() => { setBandView(b); setShowAnswer(false) }}
+                    className={`${styles.bandBtn} ${bandView === b ? (b === 'band7' ? styles.bandBtn7Active : styles.bandBtn9Active) : ''}`}
+                  >
+                    {b === 'band7' ? <><IconStar size={12} style={{ marginRight: 5, verticalAlign: -1 }} />Band 7</> : <><IconTrophy size={12} style={{ marginRight: 5, verticalAlign: -1 }} />Band 9</>}
                   </button>
                 ))}
-                <button onClick={() => setSelectedQ(null)} style={{
-                  marginLeft: 'auto', background: 'none', border: 'none',
-                  color: C.text2, fontSize: 12, cursor: 'pointer'
-                }}>← Orqaga</button>
+                <button onClick={() => setSelectedQ(null)} className={styles.backLink}>
+                  <IconArrowRight size={13} style={{ transform: 'scaleX(-1)' }} /> Orqaga
+                </button>
               </div>
 
-              {/* Question */}
-              <div style={{
-                background: C.bg2, border: `0.5px solid ${C.border}`,
-                borderRadius: 10, padding: 16
-              }}>
-                <div style={{ fontSize: 11, color: C.text2, marginBottom: 6 }}>
-                  Part {part} savol:
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 500, color: C.text }}>{selectedQ.question}</div>
+              <div className={`glassPanel ${styles.questionBox}`}>
+                <div className={styles.questionLbl}>Part {part} savol:</div>
+                <div className={styles.questionText}>{selectedQ.question}</div>
                 {part === 2 && selectedQ.cue_card && (
-                  <div style={{ marginTop: 10, padding: 10, background: 'rgba(0,245,255,0.04)', borderRadius: 8 }}>
-                    <div style={{ fontSize: 11, color: C.accent, marginBottom: 6 }}>Cue card:</div>
-                    {selectedQ.cue_card.map((c, i) => (
-                      <div key={i} style={{ fontSize: 12, color: C.text2, paddingLeft: 10 }}>• {c}</div>
-                    ))}
+                  <div className={styles.cueBox}>
+                    <div className={styles.cueBoxLbl}>Cue card:</div>
+                    {selectedQ.cue_card.map((c, i) => <div key={i} className={styles.cueBoxItem}>• {c}</div>)}
                   </div>
                 )}
               </div>
 
-              {/* Practice mode */}
               {!practiceMode ? (
-                <button onClick={() => { setPracticeMode(true); startTimer() }} style={{
-                  padding: '10px', borderRadius: 8,
-                  border: `0.5px solid ${C.amber}40`,
-                  background: `${C.amber}08`, color: C.amber,
-                  fontSize: 12, cursor: 'pointer'
-                }}>
-                  🎙️ O'zim javob beraman (vaqt boshlanadi)
+                <button onClick={() => { setPracticeMode(true); startTimer() }} className={styles.practiceBtn}>
+                  <IconMic size={16} /> O&apos;zim javob beraman (vaqt boshlanadi)
                 </button>
               ) : (
-                <div style={{
-                  background: C.bg2, border: `0.5px solid ${C.amber}40`,
-                  borderRadius: 10, padding: 14, textAlign: 'center'
-                }}>
-                  <div style={{ fontSize: 28, fontWeight: 500, color: C.amber, marginBottom: 6 }}>
-                    {mins}:{secs.toString().padStart(2, '0')}
-                  </div>
-                  <div style={{ fontSize: 11, color: C.text2, marginBottom: 12 }}>
+                <div className={`glassPanel ${styles.timerBox}`}>
+                  <div className={styles.timerNum}>{mins}:{secs.toString().padStart(2, '0')}</div>
+                  <div className={styles.timerHint}>
                     {part === 1 ? 'Part 1: 4-5 jumlada javob bering' : part === 2 ? 'Part 2: 1-2 daqiqa gapiring' : 'Part 3: Chuqur tahlil qiling'}
                   </div>
-                  <button onClick={() => { stopTimer(); setShowAnswer(true); setPracticeMode(false) }} style={{
-                    padding: '8px 20px', borderRadius: 8, border: 'none',
-                    background: C.amber, color: C.bg,
-                    fontSize: 12, fontWeight: 500, cursor: 'pointer'
-                  }}>✅ Tugatdim — javobni ko'rish</button>
+                  <button onClick={() => { stopTimer(); setShowAnswer(true); setPracticeMode(false) }} className={styles.timerFinishBtn}>
+                    <IconCheck size={14} /> Tugatdim — javobni ko&apos;rish
+                  </button>
                 </div>
               )}
 
-              {/* Sample answer */}
               {showAnswer && selectedQ[bandView] && (
-                <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 10, padding: 18 }}>
-                  <div style={{ fontSize: 12, color: bandView === 'band7' ? C.amber : C.green, fontWeight: 500, marginBottom: 12 }}>
-                    {bandView === 'band7' ? '⭐ Band 7 namuna javob:' : '🏆 Band 9 namuna javob:'}
+                <div className={`glassPanel ${styles.answerBox}`}>
+                  <div className={styles.answerBandLbl} style={{ color: bandView === 'band7' ? 'var(--on-orange)' : 'var(--on-green)' }}>
+                    {bandView === 'band7' ? 'Band 7 namuna javob:' : 'Band 9 namuna javob:'}
                   </div>
-                  <p style={{ fontSize: 13, color: C.text, lineHeight: 1.8, marginBottom: 16 }}>
-                    {selectedQ[bandView].answer}
-                  </p>
+                  <p className={styles.answerText}>{selectedQ[bandView].answer}</p>
 
-                  {/* Vocab */}
-                  <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 11, color: C.text2, marginBottom: 8 }}>📌 Muhim iboralar:</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {selectedQ[bandView].vocab.map((v, i) => (
-                        <span key={i} style={{
-                          fontSize: 11, padding: '3px 10px', borderRadius: 4,
-                          background: `${C.accent}10`, color: C.accent,
-                          border: `0.5px solid ${C.border2}`, fontFamily: 'monospace'
-                        }}>{v}</span>
-                      ))}
-                    </div>
+                  <div className={styles.vocabLbl}>Muhim iboralar:</div>
+                  <div className={styles.vocabRow}>
+                    {selectedQ[bandView].vocab.map((v, i) => <span key={i} className={styles.vocabChip}>{v}</span>)}
                   </div>
 
-                  {/* Tip */}
-                  <div style={{
-                    padding: '10px 14px', borderRadius: 8,
-                    background: `${C.green}08`, border: `0.5px solid ${C.green}30`,
-                    fontSize: 12, color: C.green
-                  }}>
-                    💡 Examiner maslahati: {selectedQ[bandView].tip}
-                  </div>
+                  <div className={styles.tipBox}>Examiner maslahati: {selectedQ[bandView].tip}</div>
                 </div>
               )}
 
-              {/* Show answer button */}
               {!showAnswer && !practiceMode && (
-                <button onClick={() => setShowAnswer(true)} style={{
-                  padding: '10px', borderRadius: 8,
-                  border: `0.5px solid ${C.border2}`,
-                  background: `${C.accent}08`, color: C.accent,
-                  fontSize: 12, cursor: 'pointer'
-                }}>👁️ Namuna javobni ko'rish</button>
+                <button onClick={() => setShowAnswer(true)} className={styles.showAnswerBtn}>
+                  <IconEye /> Namuna javobni ko&apos;rish
+                </button>
               )}
 
-              {/* Compare bands */}
               {showAnswer && (
-                <div style={{
-                  background: C.bg2, border: `0.5px solid ${C.border}`,
-                  borderRadius: 10, padding: 14
-                }}>
-                  <div style={{ fontSize: 12, color: C.text2, marginBottom: 10 }}>
-                    📊 Band 7 vs Band 9 farqi:
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div className={`glassPanel ${styles.compareBox}`}>
+                  <div className={styles.compareLbl}><IconChart size={14} /> Band 7 vs Band 9 farqi:</div>
+                  <div className={styles.compareCols}>
                     <div>
-                      <div style={{ fontSize: 11, color: C.amber, marginBottom: 6 }}>⭐ Band 7</div>
-                      {selectedQ.band7.vocab.map((v, i) => (
-                        <div key={i} style={{ fontSize: 11, color: C.text2, paddingLeft: 10, marginBottom: 3 }}>• {v}</div>
-                      ))}
+                      <div className={styles.compareColLbl} style={{ color: 'var(--on-orange)' }}>Band 7</div>
+                      {selectedQ.band7.vocab.map((v, i) => <div key={i} className={styles.compareItem}>• {v}</div>)}
                     </div>
                     <div>
-                      <div style={{ fontSize: 11, color: C.green, marginBottom: 6 }}>🏆 Band 9</div>
-                      {selectedQ.band9.vocab.map((v, i) => (
-                        <div key={i} style={{ fontSize: 11, color: C.text2, paddingLeft: 10, marginBottom: 3 }}>• {v}</div>
-                      ))}
+                      <div className={styles.compareColLbl} style={{ color: 'var(--on-green)' }}>Band 9</div>
+                      {selectedQ.band9.vocab.map((v, i) => <div key={i} className={styles.compareItem}>• {v}</div>)}
                     </div>
                   </div>
                 </div>
@@ -389,6 +315,6 @@ export default function SpeakingPage() {
           )}
         </div>
       </div>
-    </main>
+    </div>
   )
 }

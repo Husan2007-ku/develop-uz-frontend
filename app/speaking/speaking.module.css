@@ -1,0 +1,113 @@
+.wrapper { position: relative; min-height: 100vh; }
+.inner { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+.header { margin-bottom: 20px; }
+.title {
+  font-family: var(--font-rubik), sans-serif; font-weight: 800; font-size: 1.5rem;
+  margin: 0 0 6px; display: flex; align-items: center; gap: 9px;
+}
+.titleIcon {
+  width: 32px; height: 32px; border-radius: 11px;
+  background: var(--t-orange); color: var(--on-orange);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.titleIcon svg { width: 16px; height: 16px; }
+.desc { font-size: 0.82rem; color: var(--text-soft); margin: 0; }
+
+.partTabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.partTab {
+  padding: 9px 18px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  background: var(--glass); border: 1px solid var(--glass-border-soft); color: var(--text-soft);
+}
+.partTabActive { background: var(--t-blue); color: var(--on-blue); border-color: transparent; }
+.partTabSub { font-size: 0.66rem; margin-left: 6px; opacity: 0.7; font-weight: 500; }
+
+.layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.layoutSplit { grid-template-columns: 280px 1fr; }
+
+.qList { display: flex; flex-direction: column; gap: 8px; }
+.qListHint { font-size: 0.76rem; color: var(--text-faint); margin-bottom: 2px; }
+.qCard { padding: 14px; cursor: pointer; }
+.qCardActive { border-color: var(--gem-blue); background: var(--t-blue); }
+.qTopic {
+  display: inline-block; font-size: 0.64rem; padding: 2px 8px; border-radius: 5px;
+  background: var(--t-blue); color: var(--on-blue); font-family: var(--font-plex-mono), monospace; margin-bottom: 8px;
+}
+.qText { font-size: 0.82rem; color: var(--text); line-height: 1.5; }
+.cueList { margin-top: 8px; }
+.cueItem { font-size: 0.72rem; color: var(--text-faint); padding-left: 10px; }
+
+.answerPanel { display: flex; flex-direction: column; gap: 12px; }
+
+.bandRow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.bandRowLbl { font-size: 0.78rem; color: var(--text-soft); }
+.bandBtn {
+  padding: 7px 16px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+  background: var(--glass); border: 1px solid var(--glass-border-soft); color: var(--text-soft);
+}
+.bandBtn7Active { background: var(--t-orange); color: var(--on-orange); border-color: transparent; }
+.bandBtn9Active { background: var(--t-green); color: var(--on-green); border-color: transparent; }
+.backLink {
+  margin-left: auto; background: none; border: none; color: var(--text-faint);
+  font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 4px;
+}
+.backLink svg { width: 13px; height: 13px; }
+
+.questionBox { padding: 16px; }
+.questionLbl { font-size: 0.7rem; color: var(--text-faint); margin-bottom: 6px; }
+.questionText { font-size: 0.95rem; font-weight: 700; color: var(--text); line-height: 1.5; }
+.cueBox { margin-top: 10px; padding: 10px 12px; background: var(--t-blue); border-radius: 10px; }
+.cueBoxLbl { font-size: 0.7rem; color: var(--on-blue); font-weight: 700; margin-bottom: 6px; }
+.cueBoxItem { font-size: 0.78rem; color: var(--text-soft); padding-left: 10px; }
+
+.practiceBtn {
+  padding: 12px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--t-orange); border: 1px solid var(--glass-border-soft); color: var(--on-orange);
+  font-size: 0.82rem; font-weight: 700;
+}
+.practiceBtn svg { width: 16px; height: 16px; }
+
+.timerBox { padding: 18px; text-align: center; }
+.timerNum {
+  font-family: var(--font-plex-mono), monospace; font-weight: 700; font-size: 2rem; color: var(--on-orange); margin-bottom: 6px;
+}
+.timerHint { font-size: 0.74rem; color: var(--text-soft); margin-bottom: 14px; }
+.timerFinishBtn {
+  padding: 10px 22px; border-radius: 999px; border: none; cursor: pointer;
+  background: var(--gem-gradient); color: #10121a; font-size: 0.8rem; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.timerFinishBtn svg { width: 14px; height: 14px; }
+
+.answerBox { padding: 20px; }
+.answerBandLbl { font-size: 0.8rem; font-weight: 700; margin-bottom: 12px; }
+.answerText { font-size: 0.86rem; color: var(--text); line-height: 1.8; margin-bottom: 18px; }
+
+.vocabLbl { font-size: 0.72rem; color: var(--text-soft); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+.vocabLbl svg { width: 13px; height: 13px; }
+.vocabRow { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.vocabChip {
+  font-size: 0.72rem; padding: 4px 11px; border-radius: 999px;
+  background: var(--t-blue); color: var(--on-blue); font-family: var(--font-plex-mono), monospace;
+}
+
+.tipBox { padding: 11px 14px; border-radius: 12px; background: var(--t-green); font-size: 0.78rem; color: var(--on-green); line-height: 1.5; }
+
+.showAnswerBtn {
+  padding: 11px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--glass); border: 1px solid var(--glass-border-soft); color: var(--text-soft);
+  font-size: 0.8rem; font-weight: 700;
+}
+.showAnswerBtn svg { width: 15px; height: 15px; }
+
+.compareBox { padding: 16px; }
+.compareLbl { font-size: 0.78rem; color: var(--text-soft); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.compareLbl svg { width: 14px; height: 14px; }
+.compareCols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.compareColLbl { font-size: 0.74rem; font-weight: 700; margin-bottom: 8px; }
+.compareItem { font-size: 0.74rem; color: var(--text-soft); padding-left: 8px; margin-bottom: 4px; }
+
+@media (max-width: 780px) {
+  .layoutSplit { grid-template-columns: 1fr; }
+  .compareCols { grid-template-columns: 1fr; }
+}
