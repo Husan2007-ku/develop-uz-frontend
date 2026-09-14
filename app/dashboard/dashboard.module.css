@@ -1,0 +1,148 @@
+/* Token va mesh/grain endi global (app/globals.css, components/GlassBackground) —
+   bitta manba orqali navbar/landing/dashboard bir xil ko'rinadi. */
+.wrapper {
+  position: relative;
+  min-height: 100vh;
+}
+
+.page { position: relative; z-index: 2; max-width: 860px; margin: 0 auto; padding: 28px 20px 160px; }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+.brandName { font-family: var(--font-rubik), sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--text-soft); }
+
+.backBtn {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--glass); border: 1px solid var(--glass-border-soft);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  color: var(--text-soft);
+  text-decoration: none;
+}
+.backBtn:hover { color: var(--text); }
+.backBtn svg { width: 16px; height: 16px; }
+
+.topbarRight { display: flex; align-items: center; gap: 8px; }
+
+.themeToggle {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--glass); border: 1px solid var(--glass-border-soft);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 50%;
+  color: var(--text-soft);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.themeToggle:hover { color: var(--text); transform: translateY(-1px); }
+.themeToggle:focus-visible { outline: 2px solid var(--gem-blue); outline-offset: 2px; }
+.themeToggle svg { width: 17px; height: 17px; }
+.themeToggle svg[hidden] { display: none; }
+
+.profileChip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--glass); border: 1px solid var(--glass-border-soft);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 999px; padding: 5px 12px 5px 5px;
+}
+.avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--gem-gradient);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-rubik), sans-serif; font-weight: 700; font-size: 0.64rem; color: #10121a;
+}
+.profileName { font-size: 0.76rem; color: var(--text-soft); }
+.profileName b { color: var(--text); font-weight: 600; }
+
+.greet {
+  font-family: var(--font-rubik), sans-serif;
+  font-weight: 800;
+  font-size: 1.9rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.greetGradient { background: var(--gem-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+.hero {
+  padding: 26px 24px 24px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  align-items: center;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(76, 141, 255, 0.22), transparent 55%),
+    radial-gradient(120% 140% at 100% 100%, rgba(255, 111, 165, 0.18), transparent 55%),
+    var(--glass);
+}
+.heroRing { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+.heroRingSvg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ringTrack { fill: none; stroke: var(--ring-track); stroke-width: 11; }
+.ringVal { fill: none; stroke: url(#dashRingGrad); stroke-width: 11; stroke-linecap: round; }
+.heroRingCenter { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.heroRingNum { font-family: var(--font-rubik), sans-serif; font-weight: 800; font-size: 2.25rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.heroRingLbl { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-soft); margin-top: 5px; }
+
+.sparkMark { width: 18px; height: 18px; margin-bottom: 8px; }
+.goal { font-size: 0.88rem; color: var(--text-soft); margin-bottom: 12px; }
+.goal b { color: var(--text); font-weight: 700; }
+.heroPill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--pill-bg); border: 1px solid var(--glass-border-soft);
+  border-radius: 999px; padding: 7px 14px 7px 8px; font-size: 0.78rem; font-weight: 600;
+}
+.heroPillDot { width: 8px; height: 8px; border-radius: 50%; background: var(--gem-orange); }
+
+.statRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+.statChip { padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.statIcon { width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.statIcon svg { width: 18px; height: 18px; }
+.statV { font-family: var(--font-rubik), sans-serif; font-weight: 800; font-size: 1.18rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.statLbl { font-size: 0.7rem; color: var(--text-soft); margin-top: 1px; }
+
+.sectionLbl { font-family: var(--font-rubik), sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-faint); margin: 26px 4px 12px; }
+
+.moduleGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.tile { padding: 18px 18px 16px; transition: transform 0.18s ease, border-color 0.18s ease; }
+.tile:hover { transform: translateY(-3px); border-color: var(--hover-border); }
+.tileIcon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+.tileIcon svg { width: 19px; height: 19px; }
+.tile h3 { font-family: var(--font-rubik), sans-serif; font-weight: 700; font-size: 0.92rem; margin: 0 0 4px; }
+.tileLocked h3 { color: var(--text-soft); }
+.tile p { font-size: 0.76rem; color: var(--text-soft); margin: 0 0 12px; line-height: 1.4; min-height: 2.6em; }
+.progressTrack { height: 5px; border-radius: 4px; background: var(--track-bg); overflow: hidden; margin-bottom: 7px; }
+.progressTrack > span { display: block; height: 100%; border-radius: 4px; }
+.status { display: flex; align-items: center; justify-content: space-between; font-size: 0.68rem; color: var(--text-faint); }
+.pct { font-family: var(--font-plex-mono), monospace; color: var(--text-soft); }
+
+.cBlue .tileIcon { background: var(--t-blue); color: var(--on-blue); } .cBlue .progressTrack > span { background: var(--on-blue); }
+.cOrange .tileIcon { background: var(--t-orange); color: var(--on-orange); } .cOrange .progressTrack > span { background: var(--on-orange); }
+.cGreen .tileIcon { background: var(--t-green); color: var(--on-green); } .cGreen .progressTrack > span { background: var(--on-green); }
+.cViolet .tileIcon { background: var(--t-violet); color: var(--on-violet); } .cViolet .progressTrack > span { background: var(--on-violet); }
+.tileLocked .tileIcon { background: var(--t-gray); color: var(--on-gray); } .tileLocked .progressTrack > span { background: var(--on-gray); }
+
+.askBar { position: fixed; left: 0; right: 0; bottom: 18px; display: flex; justify-content: center; padding: 0 20px; pointer-events: none; z-index: 3; }
+.askInner {
+  pointer-events: auto; width: 100%; max-width: 520px;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--overlay-bg); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border-radius: 999px; padding: 11px 16px 11px 18px;
+  box-shadow: 0 1px 0 var(--glass-inset) inset, 0 20px 40px -16px rgba(0, 0, 0, 0.6);
+}
+.askTxt { flex: 1; font-size: 0.85rem; color: var(--text-faint); background: none; border: none; }
+.askMic { width: 34px; height: 34px; border-radius: 50%; background: var(--t-blue); color: var(--on-blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.askMic svg { width: 16px; height: 16px; }
+
+@media (max-width: 620px) {
+  .hero { grid-template-columns: 1fr; text-align: center; }
+  .heroRing { margin: 0 auto; }
+  .statRow { grid-template-columns: 1fr 1fr; }
+  .moduleGrid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 420px) {
+  .moduleGrid { grid-template-columns: 1fr; }
+  .statRow { grid-template-columns: 1fr; }
+  .greet { font-size: 1.5rem; }
+}

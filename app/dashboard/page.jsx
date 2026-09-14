@@ -1,133 +1,213 @@
 'use client'
-import Link from 'next/link'
 
-const C = {
-  bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
-  border: 'rgba(0,245,255,0.15)', border2: 'rgba(0,245,255,0.3)',
-  text: '#e2e8f0', text2: '#94a3b8',
-  accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
+import Link from 'next/link'
+import styles from './dashboard.module.css'
+import GlassBackground from '@/components/GlassBackground'
+import { useTheme } from '@/lib/theme-context'
+import {
+  IconPencil, IconMic, IconCards, IconBook, IconGrammar, IconTrophy,
+  IconFlame, IconWord, IconEssay, IconLock, IconSun, IconMoon, IconArrowRight,
+} from '@/components/Icons'
+
+// TODO: Telegram initData orqali backenddan haqiqiy statistikani olish
+// (bot allaqachon shu ma'lumotlarni saqlaydi — /users/{id}/stats endpoint kerak).
+// Hozircha namunaviy ma'lumotlar bilan ishlaymiz.
+const STATS = [
+  { key: 'streak', label: 'Kunlik seriya', value: '12 kun', icon: IconFlame, tone: 'orange' },
+  { key: 'words', label: "Yodlangan so'z", value: '184', icon: IconWord, tone: 'blue' },
+  { key: 'essays', label: 'Tahlil qilingan insho', value: '9', icon: IconEssay, tone: 'violet' },
+]
+
+const MODULES = [
+  {
+    key: 'writing', title: 'Yozish', desc: "Insholaringizni AI orqali Band 6-9 mezonida tahlil qiling.",
+    href: '/essays', icon: IconPencil, tone: 'cBlue', progress: 68, status: '17/25 dars',
+  },
+  {
+    key: 'speaking', title: 'Gapirish', desc: 'Speaking mavzulari bo’yicha ovozli mashqlar va fikr-mulohaza.',
+    href: '/speaking', icon: IconMic, tone: 'cOrange', progress: 42, status: '8/19 mavzu',
+  },
+  {
+    key: 'vocabulary', title: "Lug'at", desc: 'Ebbinghaus egri chizig’i asosida so’z yodlash tizimi.',
+    href: '/vocabulary', icon: IconCards, tone: 'cGreen', progress: 55, status: '184/335 so‘z',
+  },
+  {
+    key: 'reading', title: "O'qish", desc: 'Reading matnlari va tushunish mashqlari tez orada qo’shiladi.',
+    href: '#', icon: IconBook, tone: 'locked', locked: true, status: 'Tez orada',
+  },
+  {
+    key: 'grammar', title: 'Grammatika', desc: 'Grammatik tuzilmalar bo’yicha interaktiv qo’llanma va testlar.',
+    href: '#', icon: IconGrammar, tone: 'locked', locked: true, status: 'Tez orada',
+  },
+  {
+    key: 'mock', title: 'Sinov imtihoni', desc: 'To’liq formatdagi mock IELTS imtihonini his qiling.',
+    href: '#', icon: IconTrophy, tone: 'locked', locked: true, status: 'Tez orada',
+  },
+]
+
+const TONE_VARS = {
+  blue: { bg: 'var(--t-blue)', on: 'var(--on-blue)' },
+  orange: { bg: 'var(--t-orange)', on: 'var(--on-orange)' },
+  violet: { bg: 'var(--t-violet)', on: 'var(--on-violet)' },
+  green: { bg: 'var(--t-green)', on: 'var(--on-green)' },
 }
 
+const RING_R = 58
+const RING_C = 2 * Math.PI * RING_R
+const GOAL_PCT = 0.72
+
 export default function DashboardPage() {
-  const stats = [
-    { icon: '🔥', label: 'Streak', value: '0 kun', color: C.amber, bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.25)' },
-    { icon: '⭐', label: 'XP ball', value: '0', color: '#9b5de5', bg: 'rgba(149,76,233,0.1)', border: 'rgba(149,76,233,0.25)' },
-    { icon: '🧠', label: 'Yodlangan', value: "0 so'z", color: C.accent, bg: 'rgba(0,245,255,0.08)', border: C.border },
-    { icon: '📝', label: "O'qilgan", value: '0 essay', color: C.green, bg: 'rgba(147,233,190,0.08)', border: 'rgba(147,233,190,0.25)' },
-  ]
+  const { theme, setTheme } = useTheme()
 
-  const quickLinks = [
-    { icon: '✍️', title: 'Writing Essays', desc: '1000+ Band 6-9 essay', href: '/essays', color: C.accent },
-    { icon: '🧠', title: 'Vocabulary', desc: "10,000+ so'z", href: '/vocabulary', color: C.green },
-    { icon: '✏️', title: 'Study Zone', desc: 'Flashcard va testlar', href: '/study', color: '#9b5de5' },
-    { icon: '📱', title: 'Telegram Bot', desc: 'Botda davom et', href: 'https://t.me/IeLtsEssay_platfom_bot', color: C.amber },
-  ]
-
-  const card = {
-    background: C.bg2,
-    border: `0.5px solid ${C.border}`,
-    borderRadius: 10,
+  function toggleTheme() {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }
 
+  const dashOffset = RING_C * (1 - GOAL_PCT)
+
   return (
-    <main style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
-      {/* Header */}
-      <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '16px 24px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: C.accent, marginBottom: 3 }}>📊 Dashboard</h1>
-        <p style={{ fontSize: 12, color: C.text2 }}>Progressingizni kuzating va o'rganishni davom eting</p>
-      </div>
+    <div className={styles.wrapper}>
+      <GlassBackground />
 
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: 24 }}>
+      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+        <defs>
+          <linearGradient id="dashRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--gem-blue)" />
+            <stop offset="45%" stopColor="var(--gem-violet)" />
+            <stop offset="75%" stopColor="var(--gem-pink)" />
+            <stop offset="100%" stopColor="var(--gem-orange)" />
+          </linearGradient>
+        </defs>
+      </svg>
 
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 24 }}>
-          {stats.map((s, i) => (
-            <div key={i} style={{ ...card, padding: 20, textAlign: 'center', background: s.bg, borderColor: s.border }}>
-              <div style={{ fontSize: 28, marginBottom: 8 }}>{s.icon}</div>
-              <div style={{ fontSize: 22, fontWeight: 500, color: s.color, marginBottom: 3 }}>{s.value}</div>
-              <div style={{ fontSize: 11, color: C.text2 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Telegram notice */}
-        <div style={{
-          ...card, padding: 20, marginBottom: 24,
-          background: 'rgba(0,245,255,0.04)',
-          borderColor: C.border2
-        }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-            <div style={{ fontSize: 32, flexShrink: 0 }}>📱</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4, color: C.accent }}>
-                Telegram bot orqali kirish
-              </div>
-              <p style={{ fontSize: 12, color: C.text2, marginBottom: 14, lineHeight: 1.6 }}>
-                To'liq progress, streak va XP ballarni ko'rish uchun Telegram botimizga kiring.
-                Barcha ma'lumotlar bot orqali saqlanadi va Ebbinghaus Forgetting Curve asosida eslatiladi.
-              </p>
-              <Link href="https://t.me/IeLtsEssay_platfom_bot" target="_blank">
-                <button style={{
-                  padding: '8px 20px', borderRadius: 8,
-                  background: `${C.accent}15`, border: `0.5px solid ${C.border2}`,
-                  color: C.accent, fontSize: 12, fontWeight: 500, cursor: 'pointer'
-                }}>📱 Botga o'tish →</button>
-              </Link>
+      <div className={styles.page}>
+        <header className={styles.topbar}>
+          <div className={styles.brand}>
+            <Link href="/" className={styles.backBtn} aria-label="Bosh sahifaga qaytish">
+              <IconArrowRight style={{ transform: 'scaleX(-1)' }} size={16} />
+            </Link>
+            <Link href="/" className={styles.brandName} style={{ textDecoration: 'none' }}>
+              Develop UZ
+            </Link>
+          </div>
+          <div className={styles.topbarRight}>
+            <button
+              type="button"
+              className={styles.themeToggle}
+              onClick={toggleTheme}
+              aria-label="Mavzuni almashtirish"
+            >
+              <IconMoon hidden={theme === 'light'} />
+              <IconSun hidden={theme === 'dark'} />
+            </button>
+            <div className={styles.profileChip}>
+              <span className={styles.avatar}>A</span>
+              <span className={styles.profileName}>Maqsad <b>7.0</b></span>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Progress bars (placeholder) */}
-        <div style={{ ...card, padding: 20, marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 16, color: C.text }}>📈 Haftalik progress</div>
-          {[
-            { label: 'Essays o\'qildi', value: 0, max: 10, color: C.accent },
-            { label: "So'z yodlandi", value: 0, max: 50, color: C.green },
-            { label: 'Flashcard sessiyalar', value: 0, max: 7, color: '#9b5de5' },
-          ].map((p, i) => (
-            <div key={i} style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                <span style={{ fontSize: 12, color: C.text2 }}>{p.label}</span>
-                <span style={{ fontSize: 12, color: p.color, fontFamily: 'monospace' }}>{p.value}/{p.max}</span>
-              </div>
-              <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
-                <div style={{
-                  height: 4, borderRadius: 2,
-                  width: `${(p.value / p.max) * 100}%`,
-                  background: p.color, minWidth: p.value > 0 ? 8 : 0
-                }} />
-              </div>
+        <h1 className={styles.greet}>
+          Xayrli kun! Bugun ham <span className={styles.greetGradient}>maqsadga bir qadam</span> yaqinroqsiz.
+        </h1>
+
+        <section className={`glassPanel ${styles.hero}`}>
+          <div className={styles.heroRing}>
+            <svg className={styles.heroRingSvg} viewBox="0 0 140 140">
+              <circle className={styles.ringTrack} cx="70" cy="70" r={RING_R} />
+              <circle
+                className={styles.ringVal}
+                cx="70" cy="70" r={RING_R}
+                strokeDasharray={RING_C}
+                strokeDashoffset={dashOffset}
+              />
+            </svg>
+            <div className={styles.heroRingCenter}>
+              <span className={styles.heroRingNum}>6.5</span>
+              <span className={styles.heroRingLbl}>Band / 9.0</span>
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Quick links */}
-        <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 12, color: C.text2 }}>🚀 Tezkor kirish</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          {quickLinks.map((l, i) => (
-            <Link key={i} href={l.href} style={{ textDecoration: 'none' }}>
-              <div style={{
-                ...card, padding: 16,
-                display: 'flex', alignItems: 'center', gap: 14,
-                cursor: 'pointer', transition: 'all 0.2s'
-              }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = l.color}
-                onMouseLeave={e => e.currentTarget.style.borderColor = C.border}>
-                <span style={{
-                  fontSize: 24, width: 44, height: 44, borderRadius: 10,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: `${l.color}12`, flexShrink: 0
-                }}>{l.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: C.text, marginBottom: 2 }}>{l.title}</div>
-                  <div style={{ fontSize: 11, color: C.text2 }}>{l.desc}</div>
+          <div>
+            <p className={styles.goal}>
+              Maqsadli ball <b>7.0</b> ga yetishga <b>{Math.round(GOAL_PCT * 100)}%</b> qoldi.
+            </p>
+            <span className={styles.heroPill}>
+              <span className={styles.heroPillDot} />
+              Kundalik maqsad: 30 daqiqa mashq
+            </span>
+
+            <div className={styles.statRow}>
+              {STATS.map((s) => {
+                const Icon = s.icon
+                const tone = TONE_VARS[s.tone]
+                return (
+                  <div key={s.key} className={`glassPanel ${styles.statChip}`}>
+                    <span className={styles.statIcon} style={{ background: tone.bg, color: tone.on }}>
+                      <Icon size={18} />
+                    </span>
+                    <div>
+                      <div className={styles.statV}>{s.value}</div>
+                      <div className={styles.statLbl}>{s.label}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        <h2 className={styles.sectionLbl}>Modullar</h2>
+        <div className={styles.moduleGrid}>
+          {MODULES.map((m) => {
+            const Icon = m.icon
+            const tileClass = m.locked
+              ? `${styles.tile} ${styles.tileLocked}`
+              : `${styles.tile} ${styles[m.tone]}`
+            const content = (
+              <>
+                <span className={styles.tileIcon}>
+                  <Icon size={19} />
+                </span>
+                <h3>{m.title}</h3>
+                <p>{m.desc}</p>
+                {!m.locked && (
+                  <div className={styles.progressTrack}>
+                    <span style={{ width: `${m.progress}%` }} />
+                  </div>
+                )}
+                <div className={styles.status}>
+                  <span>{m.status}</span>
+                  {m.locked ? <IconLock size={13} /> : <span className={styles.pct}>{m.progress}%</span>}
                 </div>
-                <span style={{ color: C.text2, fontSize: 16, opacity: 0.4 }}>→</span>
+              </>
+            )
+            return m.locked ? (
+              <div key={m.key} className={`glassPanel ${tileClass}`} aria-disabled="true">
+                {content}
               </div>
-            </Link>
-          ))}
+            ) : (
+              <Link key={m.key} href={m.href} className={`glassPanel ${tileClass}`}>
+                {content}
+              </Link>
+            )
+          })}
         </div>
       </div>
-    </main>
+
+      <div className={styles.askBar}>
+        <div className={styles.askInner}>
+          <input
+            type="text"
+            className={styles.askTxt}
+            placeholder="AI'dan insho tahlilini so'rang..."
+            readOnly
+          />
+          <button type="button" className={styles.askMic} aria-label="Ovozli buyruq">
+            <IconMic size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }

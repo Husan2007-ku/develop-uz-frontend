@@ -1,12 +1,8 @@
 'use client'
 import { useState } from 'react'
-
-const C = {
-  bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
-  border: 'rgba(0,245,255,0.15)', border2: 'rgba(0,245,255,0.3)',
-  text: '#e2e8f0', text2: '#94a3b8',
-  accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
-}
+import GlassBackground from '@/components/GlassBackground'
+import { IconGrammar, IconLock, IconX, IconPlus } from '@/components/Icons'
+import styles from './grammar.module.css'
 
 const STRUCTURES = [
   // CONCESSION
@@ -146,6 +142,13 @@ const CATEGORIES = ['Barchasi', 'Concession', 'Addition', 'Cause & Effect', 'Com
 const BANDS = ['Barchasi', '7', '8', '9']
 const TASKS = ['Barchasi', 'task1', 'task2', 'both']
 
+const BAND_TONE = {
+  '9': { bg: 'var(--t-violet)', fg: 'var(--on-violet)' },
+  '8': { bg: 'var(--t-green)', fg: 'var(--on-green)' },
+  '7': { bg: 'var(--t-orange)', fg: 'var(--on-orange)' },
+}
+function bandTone(b) { return BAND_TONE[b] || { bg: 'var(--t-blue)', fg: 'var(--on-blue)' } }
+
 export default function GrammarPage() {
   const [category, setCategory] = useState('Barchasi')
   const [band, setBand] = useState('Barchasi')
@@ -163,65 +166,59 @@ export default function GrammarPage() {
   const free = filtered.filter(s => !s.is_premium)
   const premium = filtered.filter(s => s.is_premium)
 
-  const bandColor = (b) => {
-    if (b === '9') return C.accent
-    if (b === '8') return C.green
-    return C.amber
-  }
-
   return (
-    <main style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
-      <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '16px 24px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: C.accent, marginBottom: 3 }}>📐 Grammar & Strukturalar</h1>
-        <p style={{ fontSize: 12, color: C.text2 }}>
-          Task 1 va Task 2 uchun Band 7–9 darajasidagi grammatik strukturalar
-        </p>
-      </div>
+    <div className={styles.wrapper}>
+      <GlassBackground />
+      <div className={styles.inner}>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>
+            <span className={styles.titleIcon}><IconGrammar /></span>
+            Grammar & Strukturalar
+          </h1>
+          <p className={styles.desc}>Task 1 va Task 2 uchun Band 7–9 darajasidagi grammatik strukturalar</p>
+        </div>
 
-        {/* Filters */}
-        <div style={{
-          background: C.bg2, border: `0.5px solid ${C.border}`,
-          borderRadius: 10, padding: 16, marginBottom: 20
-        }}>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontSize: 11, color: C.text2, marginBottom: 6 }}>Kategoriya:</div>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        <div className={`glassPanel ${styles.filterBar}`}>
+          <div className={styles.filterRow}>
+            <div className={styles.filterGroup}>
+              <div className={styles.filterLbl}>Kategoriya:</div>
+              <div className={styles.filterPills}>
                 {CATEGORIES.map(c => (
-                  <button key={c} onClick={() => setCategory(c)} style={{
-                    fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                    border: `0.5px solid ${category === c ? C.accent : C.border}`,
-                    background: category === c ? `${C.accent}12` : 'transparent',
-                    color: category === c ? C.accent : C.text2,
-                  }}>{c}</button>
+                  <button
+                    key={c}
+                    className={`${styles.filterPill} ${category === c ? `${styles.filterPillActive} ${styles.pillBlue}` : ''}`}
+                    onClick={() => setCategory(c)}
+                  >{c}</button>
                 ))}
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: 11, color: C.text2, marginBottom: 6 }}>Band:</div>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {BANDS.map(b => (
-                  <button key={b} onClick={() => setBand(b)} style={{
-                    fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                    border: `0.5px solid ${band === b ? bandColor(b) : C.border}`,
-                    background: band === b ? `${bandColor(b)}12` : 'transparent',
-                    color: band === b ? bandColor(b) : C.text2,
-                  }}>{b === 'Barchasi' ? b : `Band ${b}`}</button>
-                ))}
+            <div className={styles.filterGroup}>
+              <div className={styles.filterLbl}>Band:</div>
+              <div className={styles.filterPills}>
+                {BANDS.map(b => {
+                  const tone = bandTone(b)
+                  const active = band === b
+                  return (
+                    <button
+                      key={b}
+                      className={`${styles.filterPill} ${active ? styles.filterPillActive : ''}`}
+                      style={active ? { background: tone.bg, color: tone.fg } : undefined}
+                      onClick={() => setBand(b)}
+                    >{b === 'Barchasi' ? b : `Band ${b}`}</button>
+                  )
+                })}
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: 11, color: C.text2, marginBottom: 6 }}>Task turi:</div>
-              <div style={{ display: 'flex', gap: 4 }}>
+            <div className={styles.filterGroup}>
+              <div className={styles.filterLbl}>Task turi:</div>
+              <div className={styles.filterPills}>
                 {TASKS.map(t => (
-                  <button key={t} onClick={() => setTask(t)} style={{
-                    fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                    border: `0.5px solid ${task === t ? C.accent : C.border}`,
-                    background: task === t ? `${C.accent}12` : 'transparent',
-                    color: task === t ? C.accent : C.text2,
-                  }}>
+                  <button
+                    key={t}
+                    className={`${styles.filterPill} ${task === t ? `${styles.filterPillActive} ${styles.pillBlue}` : ''}`}
+                    onClick={() => setTask(t)}
+                  >
                     {t === 'Barchasi' ? t : t === 'both' ? 'Ikkalasi' : t === 'task1' ? 'Task 1' : 'Task 2'}
                   </button>
                 ))}
@@ -230,155 +227,91 @@ export default function GrammarPage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 380px' : '1fr', gap: 16 }}>
+        <div className={`${styles.layout} ${selected ? styles.layoutSplit : ''}`}>
 
-          {/* Structure list */}
           <div>
-            <div style={{ fontSize: 12, color: C.text2, marginBottom: 10 }}>
-              {free.length} ta bepul struktura
-            </div>
+            <div className={styles.countLbl}>{free.length} ta bepul struktura</div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {free.map(s => (
-                <div key={s.id} onClick={() => setSelected(selected?.id === s.id ? null : s)} style={{
-                  background: selected?.id === s.id ? `${C.accent}08` : C.bg2,
-                  border: `0.5px solid ${selected?.id === s.id ? C.accent : C.border}`,
-                  borderRadius: 10, padding: 14, cursor: 'pointer', transition: 'all 0.15s'
-                }}
-                  onMouseEnter={e => { if (selected?.id !== s.id) e.currentTarget.style.borderColor = C.border2 }}
-                  onMouseLeave={e => { if (selected?.id !== s.id) e.currentTarget.style.borderColor = C.border }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
-                        <span style={{
-                          fontSize: 10, padding: '2px 7px', borderRadius: 4, fontFamily: 'monospace',
-                          background: `${bandColor(s.band)}12`, color: bandColor(s.band),
-                          border: `0.5px solid ${bandColor(s.band)}30`
-                        }}>Band {s.band}</span>
-                        <span style={{
-                          fontSize: 10, padding: '2px 7px', borderRadius: 4,
-                          background: `${C.accent}10`, color: C.accent, fontFamily: 'monospace'
-                        }}>{s.category}</span>
-                        <span style={{
-                          fontSize: 10, padding: '2px 7px', borderRadius: 4,
-                          background: 'rgba(255,255,255,0.05)', color: C.text2
-                        }}>{s.task_type === 'both' ? 'Task 1 & 2' : s.task_type === 'task1' ? 'Task 1' : 'Task 2'}</span>
+            <div className={styles.list}>
+              {free.map(s => {
+                const tone = bandTone(s.band)
+                return (
+                  <div
+                    key={s.id}
+                    className={`glassPanel ${styles.card} ${selected?.id === s.id ? styles.cardActive : ''}`}
+                    onClick={() => setSelected(selected?.id === s.id ? null : s)}
+                  >
+                    <div className={styles.cardTop}>
+                      <div className={styles.badgeRow}>
+                        <span className={styles.badge} style={{ background: tone.bg, color: tone.fg }}>Band {s.band}</span>
+                        <span className={`${styles.badge} ${styles.badgeCategory}`}>{s.category}</span>
+                        <span className={`${styles.badge} ${styles.badgeTask}`}>
+                          {s.task_type === 'both' ? 'Task 1 & 2' : s.task_type === 'task1' ? 'Task 1' : 'Task 2'}
+                        </span>
                       </div>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{s.title}</div>
+                      <div className={styles.cardTitle}>{s.title}</div>
                     </div>
+                    <div className={styles.structureBox}>{s.structure}</div>
                   </div>
-                  <div style={{
-                    fontSize: 12, color: C.accent, fontFamily: 'monospace',
-                    background: `${C.accent}06`, borderRadius: 6, padding: '6px 10px'
-                  }}>{s.structure}</div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
-            {/* Premium locked */}
             {premium.length > 0 && (
-              <div style={{ marginTop: 16 }}>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  marginBottom: 10
-                }}>
-                  <div style={{ fontSize: 12, color: C.text2 }}>🔒 Premium strukturalar ({premium.length} ta)</div>
-                  <button onClick={() => setShowPremium(!showPremium)} style={{
-                    fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                    border: `0.5px solid ${C.amber}40`, background: `${C.amber}08`, color: C.amber
-                  }}>{showPremium ? 'Yopish' : 'Ko\'rish'}</button>
+              <div className={styles.premiumSection}>
+                <div className={styles.premiumHead}>
+                  <div className={styles.premiumCount}><IconLock /> Premium strukturalar ({premium.length} ta)</div>
+                  <button className={styles.premiumToggle} onClick={() => setShowPremium(!showPremium)}>
+                    {showPremium ? 'Yopish' : "Ko'rish"}
+                  </button>
                 </div>
                 {showPremium && premium.map(s => (
-                  <div key={s.id} style={{
-                    background: C.bg2, border: `0.5px solid ${C.amber}20`,
-                    borderRadius: 10, padding: 14, marginBottom: 8,
-                    opacity: 0.7, position: 'relative', overflow: 'hidden'
-                  }}>
-                    <div style={{
-                      position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      borderRadius: 10, zIndex: 1
-                    }}>
-                      <span style={{
-                        fontSize: 12, color: C.amber,
-                        background: C.bg2, padding: '8px 20px',
-                        borderRadius: 8, border: `0.5px solid ${C.amber}40`
-                      }}>🔒 Premium obunasi kerak</span>
+                  <div key={s.id} className={`glassPanel ${styles.premiumCard}`}>
+                    <div className={styles.premiumOverlay}>
+                      <span className={styles.premiumLock}><IconLock /> Premium obunasi kerak</span>
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{s.title}</div>
-                    <div style={{ fontSize: 12, color: C.accent, marginTop: 6, fontFamily: 'monospace' }}>{s.structure}</div>
+                    <div className={styles.premiumTitle}>{s.title}</div>
+                    <div className={styles.premiumStructure}>{s.structure}</div>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Detail panel */}
           {selected && (
-            <div style={{ position: 'sticky', top: 80, alignSelf: 'start' }}>
-              <div style={{
-                background: C.bg2, border: `0.5px solid ${C.accent}40`,
-                borderRadius: 12, padding: 20
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 500, color: C.text }}>{selected.title}</h3>
-                  <button onClick={() => setSelected(null)} style={{
-                    background: 'none', border: 'none', color: C.text2, fontSize: 18, cursor: 'pointer'
-                  }}>×</button>
+            <div className={styles.detailPanel}>
+              <div className={`glassPanel ${styles.detailCard}`}>
+                <div className={styles.detailHead}>
+                  <h3 className={styles.detailTitle}>{selected.title}</h3>
+                  <button className={styles.closeBtn} onClick={() => setSelected(null)}><IconX /></button>
                 </div>
 
-                {/* Structure */}
-                <div style={{
-                  background: `${C.accent}08`, border: `0.5px solid ${C.border2}`,
-                  borderRadius: 8, padding: 12, marginBottom: 14, fontFamily: 'monospace',
-                  fontSize: 13, color: C.accent
-                }}>{selected.structure}</div>
+                <div className={styles.detailStructure}>{selected.structure}</div>
 
-                {/* Explanation */}
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, color: C.text2, marginBottom: 6 }}>Izoh (o'zbekcha):</div>
-                  <div style={{ fontSize: 13, color: C.text, lineHeight: 1.6 }}>{selected.explanation_uz}</div>
+                <div className={styles.detailSection}>
+                  <div className={styles.detailSectionLbl}>Izoh (o'zbekcha):</div>
+                  <div className={styles.detailText}>{selected.explanation_uz}</div>
                 </div>
 
-                {/* Badges */}
-                <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-                  <span style={{
-                    fontSize: 11, padding: '3px 9px', borderRadius: 4, fontFamily: 'monospace',
-                    background: `${bandColor(selected.band)}12`, color: bandColor(selected.band)
-                  }}>Band {selected.band}</span>
-                  <span style={{
-                    fontSize: 11, padding: '3px 9px', borderRadius: 4,
-                    background: `${C.accent}10`, color: C.accent
-                  }}>{selected.category}</span>
-                  <span style={{
-                    fontSize: 11, padding: '3px 9px', borderRadius: 4,
-                    background: 'rgba(255,255,255,0.05)', color: C.text2
-                  }}>
+                <div className={styles.detailBadges}>
+                  <span className={styles.detailBadge} style={{ background: bandTone(selected.band).bg, color: bandTone(selected.band).fg }}>Band {selected.band}</span>
+                  <span className={`${styles.detailBadge} ${styles.badgeCategory}`}>{selected.category}</span>
+                  <span className={`${styles.detailBadge} ${styles.badgeTask}`}>
                     {selected.task_type === 'both' ? 'Task 1 & 2' : selected.task_type === 'task1' ? 'Task 1' : 'Task 2'}
                   </span>
                 </div>
 
-                {/* Examples */}
-                <div style={{ fontSize: 11, color: C.text2, marginBottom: 10 }}>Misollar:</div>
+                <div className={styles.detailSectionLbl}>Misollar:</div>
                 {[selected.example_1, selected.example_2].filter(Boolean).map((ex, i) => (
-                  <div key={i} style={{
-                    fontSize: 12, color: C.text, fontStyle: 'italic', lineHeight: 1.7,
-                    padding: '8px 12px', marginBottom: 10,
-                    borderLeft: `2px solid ${C.accent}30`,
-                    background: 'rgba(0,245,255,0.03)', borderRadius: '0 6px 6px 0'
-                  }}>"{ex}"</div>
+                  <div key={i} className={styles.exampleQuote}>"{ex}"</div>
                 ))}
 
-                <button style={{
-                  width: '100%', padding: '10px', borderRadius: 8,
-                  background: `${C.accent}12`, border: `0.5px solid ${C.border2}`,
-                  color: C.accent, fontSize: 12, fontWeight: 500, cursor: 'pointer'
-                }}>+ Shaxsiy ro'yxatga qo'shish</button>
+                <button className={styles.addBtn}><IconPlus /> Shaxsiy ro'yxatga qo'shish</button>
               </div>
             </div>
           )}
         </div>
       </div>
-    </main>
+    </div>
   )
 }

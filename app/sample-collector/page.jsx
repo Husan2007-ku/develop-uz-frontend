@@ -1,22 +1,20 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-
-const C = {
-  bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
-  border: 'rgba(0,245,255,0.15)', border2: 'rgba(0,245,255,0.3)',
-  text: '#e2e8f0', text2: '#94a3b8',
-  accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
-}
+import GlassBackground from '@/components/GlassBackground'
+import {
+  IconSearch, IconSend, IconCheck, IconX, IconArrowRight, IconBook,
+} from '@/components/Icons'
+import styles from './sample-collector.module.css'
 
 const API = 'https://develop-uz-api.onrender.com'
 const TELEGRAM_ID = 7311844154
 
-const HL_STYLE = {
-  collocation: { bg: 'rgba(245,158,11,0.25)', color: '#F59E0B', label: 'Collocation', border: 'rgba(245,158,11,0.4)' },
-  idiom: { bg: 'rgba(147,233,190,0.25)', color: '#93E9BE', label: 'Idiom', border: 'rgba(147,233,190,0.4)' },
-  c1_vocab: { bg: 'rgba(0,245,255,0.2)', color: '#00F5FF', label: 'C1 Vocab', border: 'rgba(0,245,255,0.35)' },
-  c2_vocab: { bg: 'rgba(149,76,233,0.25)', color: '#9b5de5', label: 'C2 Vocab', border: 'rgba(149,76,233,0.4)' },
+const HL_TONE = {
+  collocation: { bg: 'var(--t-orange)', fg: 'var(--on-orange)', label: 'Collocation' },
+  idiom: { bg: 'var(--t-green)', fg: 'var(--on-green)', label: 'Idiom' },
+  c1_vocab: { bg: 'var(--t-blue)', fg: 'var(--on-blue)', label: 'C1 Vocab' },
+  c2_vocab: { bg: 'var(--t-violet)', fg: 'var(--on-violet)', label: 'C2 Vocab' },
 }
 
 const SAMPLE_TEXTS = [
@@ -133,18 +131,18 @@ export default function SampleCollectorPage() {
       if (idx > lastIdx) {
         result.push(<span key={`t${i}`}>{text.slice(lastIdx, idx)}</span>)
       }
-      const style = HL_STYLE[hl.type] || HL_STYLE.c1_vocab
+      const tone = HL_TONE[hl.type] || HL_TONE.c1_vocab
       const isSaved = savedWords.find(w => w.text === hl.text)
       result.push(
         <span key={`h${i}`}
           onClick={() => setSelectedHL(selectedHL?.text === hl.text ? null : hl)}
           style={{
-            background: style.bg,
-            color: style.color,
+            background: tone.bg,
+            color: tone.fg,
             padding: '1px 4px',
             borderRadius: 4,
             cursor: 'pointer',
-            border: `0.5px solid ${selectedHL?.text === hl.text ? style.color : isSaved ? style.color : 'transparent'}`,
+            border: `1px solid ${selectedHL?.text === hl.text ? tone.fg : isSaved ? tone.fg : 'transparent'}`,
             textDecoration: isSaved ? 'underline' : 'none',
             transition: 'all 0.15s'
           }}
@@ -159,7 +157,7 @@ export default function SampleCollectorPage() {
       result.push(<span key="last">{text.slice(lastIdx)}</span>)
     }
 
-    return <p style={{ lineHeight: 1.9, fontSize: 14 }}>{result}</p>
+    return <p style={{ lineHeight: 1.9, fontSize: '0.86rem' }}>{result}</p>
   }
 
   const filteredHL = activeFilter === 'all'
@@ -167,33 +165,28 @@ export default function SampleCollectorPage() {
     : highlights.filter(h => h.type === activeFilter)
 
   return (
-    <main style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
-      <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '16px 24px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: C.accent, marginBottom: 3 }}>
-          🔬 Sample Collector
-        </h1>
-        <p style={{ fontSize: 12, color: C.text2 }}>
-          Istalgan matn yoki essayni joylashtiring — AI collocations, idiomlar va C1/C2 so'zlarni ajratadi
-        </p>
-      </div>
+    <div className={styles.wrapper}>
+      <GlassBackground />
+      <div className={styles.inner}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>
+            <span className={styles.titleIcon}><IconSearch /></span>
+            Sample Collector
+          </h1>
+          <p className={styles.desc}>Istalgan matn yoki essayni joylashtiring — AI collocations, idiomlar va C1/C2 so'zlarni ajratadi</p>
+        </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
-
-        {/* Input bosqichi */}
         {!analyzed ? (
           <div>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: C.text2, marginBottom: 8 }}>
-                Namuna matnlardan birini tanlang yoki o'z matnizni yozing:
-              </div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <div className={styles.sampleWrap}>
+              <div className={styles.sampleLbl}>Namuna matnlardan birini tanlang yoki o'z matnizni yozing:</div>
+              <div className={styles.samplePills}>
                 {SAMPLE_TEXTS.map((s, i) => (
-                  <button key={i} onClick={() => setText(s.text)} style={{
-                    fontSize: 11, padding: '5px 12px', borderRadius: 6, cursor: 'pointer',
-                    border: `0.5px solid ${text === s.text ? C.accent : C.border}`,
-                    background: text === s.text ? `${C.accent}12` : 'transparent',
-                    color: text === s.text ? C.accent : C.text2,
-                  }}>{s.label}</button>
+                  <button
+                    key={i}
+                    className={`${styles.samplePill} ${text === s.text ? styles.samplePillActive : ''}`}
+                    onClick={() => setText(s.text)}
+                  >{s.label}</button>
                 ))}
               </div>
             </div>
@@ -202,201 +195,145 @@ export default function SampleCollectorPage() {
               value={text}
               onChange={e => setText(e.target.value)}
               placeholder="Matnni bu yerga joylashtiring (kamida 50 ta belgi)..."
-              style={{
-                width: '100%', height: 260, background: C.bg2,
-                border: `0.5px solid ${C.border}`, borderRadius: 12,
-                padding: 16, color: C.text, fontSize: 13, lineHeight: 1.8,
-                resize: 'vertical', outline: 'none', fontFamily: 'inherit', marginBottom: 12
-              }}
+              className={styles.textareaBox}
             />
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', gap: 12 }}>
-                {Object.entries(HL_STYLE).map(([type, style]) => (
-                  <span key={type} style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 4, color: C.text2 }}>
-                    <span style={{ display: 'inline-block', width: 10, height: 10, background: style.bg, borderRadius: 2, border: `0.5px solid ${style.border}` }} />
-                    {style.label}
+            <div className={styles.footerRow}>
+              <div className={styles.legendRow}>
+                {Object.entries(HL_TONE).map(([type, tone]) => (
+                  <span key={type} className={styles.legendItem}>
+                    <span className={styles.legendDot} style={{ background: tone.bg }} />
+                    {tone.label}
                   </span>
                 ))}
               </div>
-              <button onClick={analyzeText} disabled={text.trim().length < 50 || loading} style={{
-                padding: '11px 28px', borderRadius: 8, border: 'none',
-                background: text.trim().length >= 50 ? C.accent : 'rgba(255,255,255,0.05)',
-                color: text.trim().length >= 50 ? C.bg : C.text2,
-                fontSize: 13, fontWeight: 500,
-                cursor: text.trim().length >= 50 ? 'pointer' : 'not-allowed'
-              }}>
-                {loading ? '⏳ Tahlil qilinmoqda...' : '🔬 Tahlil qilish'}
+              <button className={styles.primaryBtn} onClick={analyzeText} disabled={text.trim().length < 50 || loading}>
+                <IconSend /> {loading ? 'Tahlil qilinmoqda...' : 'Tahlil qilish'}
               </button>
             </div>
           </div>
         ) : (
-          /* Natija */
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                <button onClick={() => setActiveFilter('all')} style={{
-                  fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                  border: `0.5px solid ${activeFilter === 'all' ? C.accent : C.border}`,
-                  background: activeFilter === 'all' ? `${C.accent}12` : 'transparent',
-                  color: activeFilter === 'all' ? C.accent : C.text2,
-                }}>Barchasi ({highlights.length})</button>
-                {Object.entries(HL_STYLE).map(([type, style]) => {
+            <div className={styles.resultHeadRow}>
+              <div className={styles.filterPills}>
+                <button
+                  className={`${styles.filterPill} ${activeFilter === 'all' ? styles.filterPillActive : ''}`}
+                  style={activeFilter === 'all' ? { background: 'var(--t-blue)', color: 'var(--on-blue)' } : undefined}
+                  onClick={() => setActiveFilter('all')}
+                >Barchasi ({highlights.length})</button>
+                {Object.entries(HL_TONE).map(([type, tone]) => {
                   const count = highlights.filter(h => h.type === type).length
                   if (count === 0) return null
                   return (
-                    <button key={type} onClick={() => setActiveFilter(type)} style={{
-                      fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                      border: `0.5px solid ${activeFilter === type ? style.color : C.border}`,
-                      background: activeFilter === type ? style.bg : 'transparent',
-                      color: activeFilter === type ? style.color : C.text2,
-                    }}>{style.label} ({count})</button>
+                    <button
+                      key={type}
+                      className={`${styles.filterPill} ${activeFilter === type ? styles.filterPillActive : ''}`}
+                      style={activeFilter === type ? { background: tone.bg, color: tone.fg } : undefined}
+                      onClick={() => setActiveFilter(type)}
+                    >{tone.label} ({count})</button>
                   )
                 })}
               </div>
-              <button onClick={() => { setAnalyzed(false); setHighlights([]); setSelectedHL(null); setSavedWords([]) }} style={{
-                fontSize: 11, padding: '6px 14px', borderRadius: 6, cursor: 'pointer',
-                border: `0.5px solid ${C.border}`, background: 'transparent', color: C.text2,
-              }}>← Yangi matn</button>
+              <button className={styles.newTextBtn} onClick={() => { setAnalyzed(false); setHighlights([]); setSelectedHL(null); setSavedWords([]) }}>
+                <IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Yangi matn
+              </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
-
-              {/* Matn + highlights */}
-              <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
-                <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-                  {Object.entries(HL_STYLE).map(([type, style]) => (
-                    <span key={type} style={{ fontSize: 10, display: 'flex', alignItems: 'center', gap: 4, color: C.text2 }}>
-                      <span style={{ display: 'inline-block', width: 8, height: 8, background: style.bg, borderRadius: 2, border: `0.5px solid ${style.border}` }} />
-                      {style.label}
+            <div className={styles.resultGrid}>
+              <div className={`glassPanel ${styles.textPanel}`}>
+                <div className={styles.legendRowSmall}>
+                  {Object.entries(HL_TONE).map(([type, tone]) => (
+                    <span key={type} className={styles.legendItem}>
+                      <span className={styles.legendDotSmall} style={{ background: tone.bg }} />
+                      {tone.label}
                     </span>
                   ))}
                 </div>
-                <div style={{ color: C.text }}>
+                <div className={styles.highlightedBody}>
                   {renderHighlighted()}
                 </div>
-                <div style={{ marginTop: 12, fontSize: 11, color: C.text2 }}>
-                  💡 Belgilangan so'z/iborani bosing — batafsil ma'lumot chiqadi
-                </div>
+                <div className={styles.hintText}>Belgilangan so'z/iborani bosing — batafsil ma'lumot chiqadi</div>
               </div>
 
-              {/* Sidebar */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-                {/* Selected highlight detail */}
+              <div className={styles.sidebarCol}>
                 {selectedHL && (
-                  <div style={{
-                    background: C.bg2,
-                    border: `0.5px solid ${HL_STYLE[selectedHL.type]?.color || C.accent}40`,
-                    borderRadius: 12, padding: 16
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                      <span style={{
-                        fontSize: 10, padding: '3px 8px', borderRadius: 4,
-                        background: HL_STYLE[selectedHL.type]?.bg,
-                        color: HL_STYLE[selectedHL.type]?.color,
-                        border: `0.5px solid ${HL_STYLE[selectedHL.type]?.border}`
-                      }}>{HL_STYLE[selectedHL.type]?.label}</span>
-                      <button onClick={() => setSelectedHL(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 16, cursor: 'pointer' }}>×</button>
+                  <div className={`glassPanel ${styles.detailCard}`}>
+                    <div className={styles.detailTop}>
+                      <span
+                        className={styles.detailTypeBadge}
+                        style={{ background: HL_TONE[selectedHL.type]?.bg, color: HL_TONE[selectedHL.type]?.fg }}
+                      >{HL_TONE[selectedHL.type]?.label}</span>
+                      <button className={styles.closeBtn} onClick={() => setSelectedHL(null)}><IconX /></button>
                     </div>
-                    <div style={{ fontSize: 18, fontWeight: 500, color: C.text, marginBottom: 6 }}>{selectedHL.text}</div>
+                    <div className={styles.detailWord}>{selectedHL.text}</div>
                     {selectedHL.explanation_uz && (
-                      <div style={{ fontSize: 13, color: C.text2, marginBottom: 10, lineHeight: 1.6 }}>
-                        🇺🇿 {selectedHL.explanation_uz}
-                      </div>
+                      <div className={styles.detailExpl}>{selectedHL.explanation_uz}</div>
                     )}
                     {selectedHL.how_to_use && (
-                      <div style={{
-                        fontSize: 12, color: C.accent, padding: '8px 12px',
-                        background: `${C.accent}08`, borderRadius: 8, marginBottom: 12,
-                        fontFamily: 'monospace'
-                      }}>{selectedHL.how_to_use}</div>
+                      <div className={styles.detailUsage}>{selectedHL.how_to_use}</div>
                     )}
                     <button
+                      className={`${styles.detailSaveBtn} ${savedWords.find(w => w.text === selectedHL.text) ? styles.detailSaveBtnSaved : ''}`}
                       onClick={() => saveToVocab(selectedHL)}
                       disabled={!!savedWords.find(w => w.text === selectedHL.text) || savingId === selectedHL.text}
-                      style={{
-                        width: '100%', padding: '8px', borderRadius: 8, cursor: 'pointer',
-                        background: savedWords.find(w => w.text === selectedHL.text) ? `${C.green}15` : `${C.accent}12`,
-                        border: `0.5px solid ${savedWords.find(w => w.text === selectedHL.text) ? `${C.green}40` : C.border2}`,
-                        color: savedWords.find(w => w.text === selectedHL.text) ? C.green : C.accent,
-                        fontSize: 12,
-                      }}>
-                      {savingId === selectedHL.text ? '⏳ Saqlanmoqda...' :
-                        savedWords.find(w => w.text === selectedHL.text) ? '✅ Saqlandi' :
-                          "+ Vocabularyga qo'shish"}
+                    >
+                      {savingId === selectedHL.text ? 'Saqlanmoqda...' :
+                        savedWords.find(w => w.text === selectedHL.text) ? <><IconCheck /> Saqlandi</> :
+                          "Vocabularyga qo'shish"}
                     </button>
                   </div>
                 )}
 
-                {/* Highlights list */}
-                <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', flex: 1 }}>
-                  <div style={{ padding: '10px 14px', borderBottom: `0.5px solid ${C.border}`, fontSize: 12, fontWeight: 500, color: C.text2 }}>
-                    Topilgan iboralar ({filteredHL.length})
-                  </div>
-                  <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                <div className={`glassPanel ${styles.listCard}`}>
+                  <div className={styles.listHead}>Topilgan iboralar ({filteredHL.length})</div>
+                  <div className={styles.listBody}>
                     {filteredHL.map((hl, i) => {
-                      const style = HL_STYLE[hl.type] || HL_STYLE.c1_vocab
+                      const tone = HL_TONE[hl.type] || HL_TONE.c1_vocab
                       const isSaved = !!savedWords.find(w => w.text === hl.text)
                       return (
-                        <div key={i}
+                        <div
+                          key={i}
+                          className={`${styles.listItem} ${selectedHL?.text === hl.text ? styles.listItemActive : ''}`}
                           onClick={() => setSelectedHL(selectedHL?.text === hl.text ? null : hl)}
-                          style={{
-                            padding: '10px 14px', cursor: 'pointer',
-                            borderBottom: `0.5px solid ${C.border}`,
-                            background: selectedHL?.text === hl.text ? `${style.color}08` : 'transparent',
-                            transition: 'all 0.15s'
-                          }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                            <span style={{ fontSize: 13, fontWeight: 500, color: style.color }}>{hl.text}</span>
-                            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                              {isSaved && <span style={{ fontSize: 10, color: C.green }}>✅</span>}
-                              <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: style.bg, color: style.color }}>{style.label}</span>
+                        >
+                          <div className={styles.listItemTop}>
+                            <span className={styles.listItemWord} style={{ color: tone.fg }}>{hl.text}</span>
+                            <div className={styles.listItemMeta}>
+                              {isSaved && <IconCheck className={styles.listItemSavedIcon} />}
+                              <span className={styles.listItemTypeBadge} style={{ background: tone.bg, color: tone.fg }}>{tone.label}</span>
                             </div>
                           </div>
-                          <div style={{ fontSize: 11, color: C.text2 }}>{hl.explanation_uz}</div>
+                          <div className={styles.listItemExpl}>{hl.explanation_uz}</div>
                         </div>
                       )
                     })}
                   </div>
                 </div>
 
-                {/* Saqlangan words panel */}
-                <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: 14 }}>
-                  <div style={{ fontSize: 12, color: C.text2, marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>💾 Saqlangan ({savedWords.length} ta)</span>
+                <div className={`glassPanel ${styles.savedCard}`}>
+                  <div className={styles.savedHead}>
+                    <span>Saqlangan ({savedWords.length} ta)</span>
                     {savedWords.length > 0 && (
-                      <Link href="/my-vocab" style={{ fontSize: 11, color: C.accent, textDecoration: 'none' }}>
-                        Ko'rish →
+                      <Link href="/my-vocab" className={styles.savedViewLink}>
+                        Ko'rish <IconArrowRight />
                       </Link>
                     )}
                   </div>
 
                   {savedWords.length === 0 ? (
-                    <div style={{ fontSize: 11, color: C.text2, textAlign: 'center', padding: '12px 0' }}>
-                      Iborani bosib saqlang
-                    </div>
+                    <div className={styles.savedEmpty}>Iborani bosib saqlang</div>
                   ) : (
                     <>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
+                      <div className={styles.savedChipsRow}>
                         {savedWords.map((w, i) => (
-                          <span key={i} style={{
-                            fontSize: 11, padding: '3px 8px', borderRadius: 4,
-                            background: `${C.green}12`, color: C.green,
-                            border: `0.5px solid ${C.green}30`, fontFamily: 'monospace'
-                          }}>{w.text}</span>
+                          <span key={i} className={styles.savedChip}>{w.text}</span>
                         ))}
                       </div>
                       <button
+                        className={`${styles.saveAllBtn} ${saveSuccess ? styles.saveAllBtnSuccess : ''}`}
                         onClick={saveAllToVocab}
-                        style={{
-                          width: '100%', padding: '9px', borderRadius: 8,
-                          background: saveSuccess ? `${C.green}15` : `${C.accent}12`,
-                          border: `0.5px solid ${saveSuccess ? `${C.green}40` : C.border2}`,
-                          color: saveSuccess ? C.green : C.accent,
-                          fontSize: 12, fontWeight: 500, cursor: 'pointer'
-                        }}>
-                        {saveSuccess ? '✅ Hammasi saqlandi!' : '📚 Barchasini vocabularyga qo\'shish'}
+                      >
+                        {saveSuccess ? <><IconCheck /> Hammasi saqlandi!</> : <><IconBook /> Barchasini vocabularyga qo'shish</>}
                       </button>
                     </>
                   )}
@@ -406,6 +343,6 @@ export default function SampleCollectorPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

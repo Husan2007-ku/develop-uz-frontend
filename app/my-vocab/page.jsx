@@ -1,28 +1,28 @@
 'use client'
 import { useState, useEffect } from 'react'
-
-const C = {
-  bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
-  border: 'rgba(0,245,255,0.15)', border2: 'rgba(0,245,255,0.3)',
-  text: '#e2e8f0', text2: '#94a3b8',
-  accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
-}
+import GlassBackground from '@/components/GlassBackground'
+import {
+  IconBook, IconRepeat, IconSearch, IconTarget, IconEye, IconCheck,
+  IconX, IconPlus, IconArrowRight, IconRefresh,
+} from '@/components/Icons'
+import styles from './my-vocab.module.css'
 
 const API = 'https://develop-uz-api.onrender.com'
 const TELEGRAM_ID = 7311844154
 
-const STATUS_STYLE = {
-  new: { label: 'Yangi', color: C.accent, bg: 'rgba(0,245,255,0.1)' },
-  learning: { label: "O'rganmoqda", color: C.amber, bg: 'rgba(245,158,11,0.1)' },
-  review: { label: 'Takrorlash', color: '#9b5de5', bg: 'rgba(149,76,233,0.1)' },
-  mastered: { label: 'Yodlangan', color: C.green, bg: 'rgba(147,233,190,0.1)' },
+const STATUS_TONE = {
+  new: { label: 'Yangi', bg: 'var(--t-blue)', fg: 'var(--on-blue)' },
+  learning: { label: "O'rganmoqda", bg: 'var(--t-orange)', fg: 'var(--on-orange)' },
+  review: { label: 'Takrorlash', bg: 'var(--t-violet)', fg: 'var(--on-violet)' },
+  mastered: { label: 'Yodlangan', bg: 'var(--t-green)', fg: 'var(--on-green)' },
 }
 
-const LEVEL_STYLE = {
-  B2: { color: C.green, bg: 'rgba(147,233,190,0.12)', border: 'rgba(147,233,190,0.3)' },
-  C1: { color: C.accent, bg: 'rgba(0,245,255,0.1)', border: 'rgba(0,245,255,0.3)' },
-  C2: { color: '#9b5de5', bg: 'rgba(149,76,233,0.12)', border: 'rgba(149,76,233,0.3)' },
+const LEVEL_TONE = {
+  B2: { bg: 'var(--t-green)', fg: 'var(--on-green)' },
+  C1: { bg: 'var(--t-blue)', fg: 'var(--on-blue)' },
+  C2: { bg: 'var(--t-violet)', fg: 'var(--on-violet)' },
 }
+function levelTone(l) { return LEVEL_TONE[l] || LEVEL_TONE.B2 }
 
 export default function MyVocabPage() {
   const [tab, setTab] = useState('my_vocab')
@@ -122,108 +122,99 @@ export default function MyVocabPage() {
     return (w.status || 'new') === filterStatus
   })
 
-  const card = { background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 10 }
-
   return (
-    <main style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
-      <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '16px 24px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: C.accent, marginBottom: 3 }}>📚 Mening Vocabularyim</h1>
-        <p style={{ fontSize: 12, color: C.text2 }}>Saqlagan so'zlaringiz, takrorlash jadvali va yangi so'z qidirish</p>
-      </div>
+    <div className={styles.wrapper}>
+      <GlassBackground />
+      <div className={styles.inner}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>
+            <span className={styles.titleIcon}><IconBook /></span>
+            Mening Vocabularyim
+          </h1>
+          <p className={styles.desc}>Saqlagan so'zlaringiz, takrorlash jadvali va yangi so'z qidirish</p>
+        </div>
 
-      <div style={{ maxWidth: 1000, margin: '0 auto', padding: 24 }}>
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
+        <div className={styles.tabRow}>
           {[
-            { id: 'my_vocab', label: `📖 Mening so'zlarim (${words.length})` },
-            { id: 'review', label: `🔄 Takrorlash (${dueWords.length})` },
-            { id: 'search', label: "🔍 So'z qidirish" },
+            { id: 'my_vocab', label: `Mening so'zlarim (${words.length})` },
+            { id: 'review', label: `Takrorlash (${dueWords.length})` },
+            { id: 'search', label: "So'z qidirish" },
           ].map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              padding: '8px 16px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
-              border: `0.5px solid ${tab === t.id ? C.accent : C.border}`,
-              background: tab === t.id ? `${C.accent}12` : 'transparent',
-              color: tab === t.id ? C.accent : C.text2, fontWeight: tab === t.id ? 500 : 400,
-            }}>{t.label}</button>
+            <button key={t.id} className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`} onClick={() => setTab(t.id)}>
+              {t.label}
+            </button>
           ))}
         </div>
 
         {/* MY VOCAB */}
         {tab === 'my_vocab' && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 20 }}>
-              {Object.entries(STATUS_STYLE).map(([status, style]) => {
+            <div className={styles.statsGrid}>
+              {Object.entries(STATUS_TONE).map(([status, tone]) => {
                 const count = words.filter(w => (w.status || 'new') === status).length
                 return (
-                  <div key={status} style={{ ...card, padding: 14, textAlign: 'center', background: style.bg, borderColor: `${style.color}30` }}>
-                    <div style={{ fontSize: 20, fontWeight: 500, color: style.color }}>{count}</div>
-                    <div style={{ fontSize: 11, color: C.text2 }}>{style.label}</div>
+                  <div key={status} className={styles.statCard} style={{ background: tone.bg }}>
+                    <div className={styles.statNum} style={{ color: tone.fg }}>{count}</div>
+                    <div className={styles.statLbl}>{tone.label}</div>
                   </div>
                 )
               })}
             </div>
 
             {dueWords.length > 0 && (
-              <div style={{ ...card, padding: 16, marginBottom: 20, background: `${C.amber}08`, borderColor: `${C.amber}30`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div className={styles.dueBanner}>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: C.amber, marginBottom: 4 }}>
-                    🔔 Bugun takrorlanishi kerak: {dueWords.length} ta so'z
-                  </div>
-                  <div style={{ fontSize: 12, color: C.text2 }}>Ebbinghaus Forgetting Curve — takrorlamasangiz unutasiz</div>
+                  <div className={styles.dueBannerTitle}><IconTarget /> Bugun takrorlanishi kerak: {dueWords.length} ta so'z</div>
+                  <div className={styles.dueBannerDesc}>Ebbinghaus Forgetting Curve — takrorlamasangiz unutasiz</div>
                 </div>
-                <button onClick={startReview} style={{
-                  padding: '10px 20px', borderRadius: 8, border: 'none',
-                  background: C.amber, color: C.bg, fontSize: 12, fontWeight: 500, cursor: 'pointer', flexShrink: 0
-                }}>Takrorlashni boshlash →</button>
+                <button className={styles.dueBannerBtn} onClick={startReview}>
+                  Takrorlashni boshlash <IconArrowRight />
+                </button>
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+            <div className={styles.filterPills}>
               {[
                 { id: 'all', label: 'Barchasi' },
-                ...Object.entries(STATUS_STYLE).map(([id, s]) => ({ id, label: s.label }))
+                ...Object.entries(STATUS_TONE).map(([id, s]) => ({ id, label: s.label }))
               ].map(f => (
-                <button key={f.id} onClick={() => setFilterStatus(f.id)} style={{
-                  fontSize: 11, padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
-                  border: `0.5px solid ${filterStatus === f.id ? C.accent : C.border}`,
-                  background: filterStatus === f.id ? `${C.accent}12` : 'transparent',
-                  color: filterStatus === f.id ? C.accent : C.text2,
-                }}>{f.label}</button>
+                <button
+                  key={f.id}
+                  className={`${styles.filterPill} ${filterStatus === f.id ? styles.filterPillActive : ''}`}
+                  onClick={() => setFilterStatus(f.id)}
+                >{f.label}</button>
               ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 320px' : '1fr', gap: 12 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px,1fr))', gap: 8, alignContent: 'start' }}>
+            <div className={`${styles.layout} ${selected ? styles.layoutSplit : ''}`}>
+              <div className={styles.wordGrid}>
                 {loading ? (
-                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px 0', color: C.text2 }}>Yuklanmoqda...</div>
+                  <div className={styles.loadingMsg}>Yuklanmoqda...</div>
                 ) : filtered.length === 0 ? (
-                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px 0' }}>
-                    <div style={{ fontSize: 36, marginBottom: 10, opacity: 0.3 }}>📚</div>
-                    <div style={{ fontSize: 13, color: C.text2 }}>
-                      Hali so'z saqlanmagan.<br />
-                      <button onClick={() => setTab('search')} style={{ color: C.accent, background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>
-                        So'z qidirish →
-                      </button>
-                    </div>
+                  <div className={styles.emptyMsg}>
+                    <IconBook className={styles.emptyIcon} />
+                    Hali so'z saqlanmagan.<br />
+                    <button className={styles.emptyLink} onClick={() => setTab('search')}>
+                      So'z qidirish →
+                    </button>
                   </div>
                 ) : filtered.map(w => {
-                  const lvStyle = LEVEL_STYLE[w.cefr_level] || LEVEL_STYLE.B2
-                  const stStyle = STATUS_STYLE[w.status || 'new'] || STATUS_STYLE.new
+                  const lvTone = levelTone(w.cefr_level)
+                  const stTone = STATUS_TONE[w.status || 'new'] || STATUS_TONE.new
                   return (
-                    <div key={w.id} onClick={() => setSelected(selected?.id === w.id ? null : w)} style={{
-                      ...card, padding: 14, cursor: 'pointer', transition: 'all 0.15s',
-                      borderColor: selected?.id === w.id ? C.accent : C.border,
-                      background: selected?.id === w.id ? `${C.accent}05` : C.bg2,
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                        <span style={{ fontSize: 16, fontWeight: 500, color: C.text }}>{w.word}</span>
-                        <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, fontFamily: 'monospace', background: lvStyle.bg, color: lvStyle.color, border: `0.5px solid ${lvStyle.border}` }}>{w.cefr_level}</span>
+                    <div
+                      key={w.id}
+                      className={`glassPanel ${styles.wordCard} ${selected?.id === w.id ? styles.wordCardActive : ''}`}
+                      onClick={() => setSelected(selected?.id === w.id ? null : w)}
+                    >
+                      <div className={styles.wordCardTop}>
+                        <span className={styles.wordCardWord}>{w.word}</span>
+                        <span className={styles.badge} style={{ background: lvTone.bg, color: lvTone.fg }}>{w.cefr_level}</span>
                       </div>
-                      <div style={{ fontSize: 12, color: C.text2, marginBottom: 8 }}>🇺🇿 {w.translation_uz}</div>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: stStyle.bg, color: stStyle.color }}>{stStyle.label}</span>
-                        {w.word_type && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', color: C.text2 }}>{w.word_type}</span>}
+                      <div className={styles.wordCardTranslation}>{w.translation_uz}</div>
+                      <div className={styles.wordCardBadges}>
+                        <span className={styles.badge} style={{ background: stTone.bg, color: stTone.fg }}>{stTone.label}</span>
+                        {w.word_type && <span className={`${styles.badge} ${styles.badgeGray}`}>{w.word_type}</span>}
                       </div>
                     </div>
                   )
@@ -231,41 +222,41 @@ export default function MyVocabPage() {
               </div>
 
               {selected && (
-                <div style={{ position: 'sticky', top: 80, alignSelf: 'start' }}>
-                  <div style={{ ...card, padding: 20, borderColor: `${C.accent}40` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div className={styles.detailPanel}>
+                  <div className={`glassPanel ${styles.detailCard}`}>
+                    <div className={styles.detailTop}>
                       <div>
-                        <div style={{ fontSize: 22, fontWeight: 500, color: C.accent }}>{selected.word}</div>
-                        <div style={{ fontSize: 13, color: C.text2 }}>🇺🇿 {selected.translation_uz}</div>
+                        <div className={styles.detailWord}>{selected.word}</div>
+                        <div className={styles.detailTranslation}>{selected.translation_uz}</div>
                       </div>
-                      <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 18, cursor: 'pointer' }}>×</button>
+                      <button className={styles.closeBtn} onClick={() => setSelected(null)}><IconX /></button>
                     </div>
                     {selected.example_1 && (
-                      <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 11, color: C.text2, marginBottom: 6 }}>Misol:</div>
-                        <div style={{ fontSize: 12, color: C.text, fontStyle: 'italic', lineHeight: 1.6, padding: '6px 10px', borderLeft: `2px solid ${C.accent}20`, background: 'rgba(0,245,255,0.02)', borderRadius: '0 6px 6px 0' }}>"{selected.example_1}"</div>
+                      <div className={styles.detailSection}>
+                        <div className={styles.detailSectionLbl}>Misol:</div>
+                        <div className={styles.exampleQuote}>"{selected.example_1}"</div>
                       </div>
                     )}
                     {selected.collocations?.length > 0 && (
-                      <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 11, color: C.text2, marginBottom: 6 }}>Collocations:</div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      <div className={styles.detailSection}>
+                        <div className={styles.detailSectionLbl}>Collocations:</div>
+                        <div className={styles.collocRow}>
                           {selected.collocations.map((c, i) => (
-                            <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: `${C.amber}12`, color: C.amber, fontFamily: 'monospace' }}>{c}</span>
+                            <span key={i} className={styles.collocChip}>{c}</span>
                           ))}
                         </div>
                       </div>
                     )}
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: 12, marginBottom: 14 }}>
-                      <div style={{ fontSize: 11, color: C.text2, marginBottom: 8 }}>Progress:</div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 18, fontWeight: 500, color: C.green }}>{selected.correct_count || 0}</div>
-                          <div style={{ fontSize: 10, color: C.text2 }}>To'g'ri</div>
+                    <div className={styles.progressBox}>
+                      <div className={styles.progressLbl}>Progress:</div>
+                      <div className={styles.progressGrid}>
+                        <div className={styles.progressItem}>
+                          <div className={styles.progressNum} style={{ color: 'var(--on-green)' }}>{selected.correct_count || 0}</div>
+                          <div className={styles.progressItemLbl}>To'g'ri</div>
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: 18, fontWeight: 500, color: '#ef4444' }}>{selected.wrong_count || 0}</div>
-                          <div style={{ fontSize: 10, color: C.text2 }}>Xato</div>
+                        <div className={styles.progressItem}>
+                          <div className={styles.progressNum} style={{ color: 'var(--on-red)' }}>{selected.wrong_count || 0}</div>
+                          <div className={styles.progressItemLbl}>Xato</div>
                         </div>
                       </div>
                     </div>
@@ -278,65 +269,75 @@ export default function MyVocabPage() {
 
         {/* REVIEW */}
         {tab === 'review' && (
-          <div style={{ maxWidth: 600, margin: '0 auto' }}>
+          <div className={styles.reviewWrap}>
             {words.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px 0', color: C.text2 }}>
-                <div style={{ fontSize: 36, marginBottom: 10, opacity: 0.3 }}>📚</div>
-                <div style={{ fontSize: 13 }}>Hali so'z saqlanmagan</div>
+              <div className={styles.centerBox}>
+                <IconBook className={styles.emptyIconBig} />
+                Hali so'z saqlanmagan
               </div>
             ) : reviewDone ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
-                <h2 style={{ fontSize: 22, fontWeight: 500, marginBottom: 16 }}>Takrorlash tugadi!</h2>
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 24 }}>
-                  <div style={{ ...card, padding: '16px 28px', borderColor: `${C.green}40`, background: `${C.green}08` }}>
-                    <div style={{ fontSize: 28, fontWeight: 500, color: C.green }}>{reviewScore.correct}</div>
-                    <div style={{ fontSize: 11, color: C.text2 }}>To'g'ri</div>
+                <h2 className={styles.finishedTitle}>Takrorlash tugadi!</h2>
+                <div className={styles.scoreRow}>
+                  <div className={`glassPanel ${styles.scoreCard}`}>
+                    <div className={styles.scoreNum} style={{ color: 'var(--on-green)' }}>{reviewScore.correct}</div>
+                    <div className={styles.scoreLbl}>To'g'ri</div>
                   </div>
-                  <div style={{ ...card, padding: '16px 28px', borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)' }}>
-                    <div style={{ fontSize: 28, fontWeight: 500, color: '#ef4444' }}>{reviewScore.wrong}</div>
-                    <div style={{ fontSize: 11, color: C.text2 }}>Noto'g'ri</div>
+                  <div className={`glassPanel ${styles.scoreCard}`}>
+                    <div className={styles.scoreNum} style={{ color: 'var(--on-red)' }}>{reviewScore.wrong}</div>
+                    <div className={styles.scoreLbl}>Noto'g'ri</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                  <button onClick={() => setTab('my_vocab')} style={{ padding: '10px 20px', borderRadius: 8, border: `0.5px solid ${C.border}`, background: 'transparent', color: C.text2, fontSize: 12, cursor: 'pointer' }}>← Orqaga</button>
-                  <button onClick={startReview} style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: C.accent, color: C.bg, fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>🔄 Qayta boshlash</button>
+                <div className={styles.finishedActions}>
+                  <button className={styles.ghostBtn} onClick={() => setTab('my_vocab')}>
+                    <IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Orqaga
+                  </button>
+                  <button className={styles.primaryBtn} onClick={startReview}>
+                    <IconRefresh /> Qayta boshlash
+                  </button>
                 </div>
               </div>
             ) : dueWords[reviewIdx] && (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <button onClick={() => setTab('my_vocab')} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 12, cursor: 'pointer' }}>← Orqaga</button>
-                  <span style={{ fontSize: 12, color: C.text2 }}>{reviewIdx + 1} / {dueWords.length}</span>
-                  <span style={{ fontSize: 12 }}>
-                    <span style={{ color: C.green }}>✅ {reviewScore.correct}</span>
-                    {' · '}
-                    <span style={{ color: '#ef4444' }}>❌ {reviewScore.wrong}</span>
+                <div className={styles.reviewHead}>
+                  <button className={styles.reviewBackBtn} onClick={() => setTab('my_vocab')}>
+                    <IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Orqaga
+                  </button>
+                  <span className={styles.reviewCounter}>{reviewIdx + 1} / {dueWords.length}</span>
+                  <span className={styles.reviewScoreInline}>
+                    <span className={styles.reviewScoreGood}><IconCheck /> {reviewScore.correct}</span>
+                    <span className={styles.reviewScoreBad}><IconX /> {reviewScore.wrong}</span>
                   </span>
                 </div>
-                <div style={{ height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2, marginBottom: 20 }}>
-                  <div style={{ height: 3, borderRadius: 2, background: C.accent, width: `${(reviewIdx / dueWords.length) * 100}%` }} />
+                <div className={styles.reviewProgressTrack}>
+                  <div className={styles.reviewProgressFill} style={{ width: `${(reviewIdx / dueWords.length) * 100}%` }} />
                 </div>
-                <div style={{ ...card, textAlign: 'center', padding: 32, marginBottom: 16, minHeight: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ fontSize: 11, color: C.text2, fontFamily: 'monospace', marginBottom: 12 }}>
+                <div className={`glassPanel ${styles.reviewCard}`}>
+                  <div className={styles.reviewMeta}>
                     {dueWords[reviewIdx].cefr_level} · {dueWords[reviewIdx].word_type}
                   </div>
-                  <div style={{ fontSize: 36, fontWeight: 500, color: C.accent, marginBottom: 8 }}>{dueWords[reviewIdx].word}</div>
+                  <div className={styles.reviewWord}>{dueWords[reviewIdx].word}</div>
                   {!showReviewAnswer ? (
-                    <button onClick={() => setShowReviewAnswer(true)} style={{ marginTop: 16, padding: '8px 20px', borderRadius: 8, border: `0.5px solid ${C.border}`, background: 'transparent', color: C.text2, fontSize: 12, cursor: 'pointer' }}>👁️ Javobni ko'rish</button>
+                    <button className={styles.reviewRevealBtn} onClick={() => setShowReviewAnswer(true)}>
+                      <IconEye /> Javobni ko'rish
+                    </button>
                   ) : (
-                    <div style={{ marginTop: 12 }}>
-                      <div style={{ fontSize: 20, color: C.green, fontWeight: 500, marginBottom: 6 }}>🇺🇿 {dueWords[reviewIdx].translation_uz}</div>
+                    <div className={styles.reviewAnswerWrap}>
+                      <div className={styles.reviewAnswerTranslation}>{dueWords[reviewIdx].translation_uz}</div>
                       {dueWords[reviewIdx].example_1 && (
-                        <div style={{ fontSize: 12, color: C.text2, fontStyle: 'italic', maxWidth: 400, lineHeight: 1.6, marginTop: 8 }}>"{dueWords[reviewIdx].example_1}"</div>
+                        <div className={styles.reviewAnswerExample}>"{dueWords[reviewIdx].example_1}"</div>
                       )}
                     </div>
                   )}
                 </div>
                 {showReviewAnswer && (
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => nextReview(false)} style={{ flex: 1, padding: 14, borderRadius: 10, background: 'rgba(239,68,68,0.1)', border: '0.5px solid rgba(239,68,68,0.3)', color: '#ef4444', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>❌ Unutdim</button>
-                    <button onClick={() => nextReview(true)} style={{ flex: 1, padding: 14, borderRadius: 10, background: `${C.green}15`, border: `0.5px solid ${C.green}40`, color: C.green, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>✅ Esladim</button>
+                  <div className={styles.reviewJudgeRow}>
+                    <button className={`${styles.reviewJudgeBtn} ${styles.judgeBad}`} onClick={() => nextReview(false)}>
+                      <IconX /> Unutdim
+                    </button>
+                    <button className={`${styles.reviewJudgeBtn} ${styles.judgeGood}`} onClick={() => nextReview(true)}>
+                      <IconCheck /> Esladim
+                    </button>
                   </div>
                 )}
               </div>
@@ -347,51 +348,47 @@ export default function MyVocabPage() {
         {/* SEARCH */}
         {tab === 'search' && (
           <div>
-            <div style={{ ...card, padding: 20, marginBottom: 20 }}>
-              <div style={{ fontSize: 12, color: C.text2, marginBottom: 10 }}>So'z qidiring va vocabularyga qo'shing:</div>
+            <div className={`glassPanel ${styles.searchBox}`}>
+              <div className={styles.searchLbl}>So'z qidiring va vocabularyga qo'shing:</div>
               <input
                 value={searchQuery}
                 onChange={e => searchVocab(e.target.value)}
                 placeholder="Masalan: exacerbate, unprecedented, facilitate..."
                 autoFocus
-                style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: `0.5px solid ${C.border2}`, background: C.bg, color: C.text, fontSize: 14, outline: 'none', fontFamily: 'inherit' }}
+                className={styles.searchInput}
               />
             </div>
 
-            {searching && <div style={{ textAlign: 'center', padding: '20px 0', color: C.text2, fontSize: 13 }}>Qidirilmoqda...</div>}
+            {searching && <div className={styles.searchingMsg}>Qidirilmoqda...</div>}
 
             {searchResults.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px,1fr))', gap: 10 }}>
+              <div className={styles.resultsGrid}>
                 {searchResults.map(w => {
-                  const lvStyle = LEVEL_STYLE[w.cefr_level] || LEVEL_STYLE.B2
+                  const lvTone = levelTone(w.cefr_level)
                   const isSaved = savedIds.has(w.id)
                   return (
-                    <div key={w.id} style={{ ...card, padding: 16 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ fontSize: 16, fontWeight: 500, color: C.text }}>{w.word}</span>
-                        <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, fontFamily: 'monospace', background: lvStyle.bg, color: lvStyle.color, border: `0.5px solid ${lvStyle.border}` }}>{w.cefr_level}</span>
+                    <div key={w.id} className={`glassPanel ${styles.resultCard}`}>
+                      <div className={styles.resultTop}>
+                        <span className={styles.resultWord}>{w.word}</span>
+                        <span className={styles.badge} style={{ background: lvTone.bg, color: lvTone.fg }}>{w.cefr_level}</span>
                       </div>
-                      <div style={{ fontSize: 13, color: C.text2, marginBottom: 10 }}>🇺🇿 {w.translation_uz}</div>
+                      <div className={styles.resultTranslation}>{w.translation_uz}</div>
                       {w.example_1 && (
-                        <div style={{ fontSize: 12, color: C.text2, fontStyle: 'italic', lineHeight: 1.5, marginBottom: 12, borderLeft: `2px solid ${C.accent}20`, paddingLeft: 8 }}>"{w.example_1}"</div>
+                        <div className={styles.resultExample}>"{w.example_1}"</div>
                       )}
                       {w.collocations?.length > 0 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 12 }}>
+                        <div className={styles.resultCollocRow}>
                           {w.collocations.map((c, i) => (
-                            <span key={i} style={{ fontSize: 10, padding: '1px 6px', borderRadius: 3, background: `${C.amber}10`, color: C.amber, fontFamily: 'monospace' }}>{c}</span>
+                            <span key={i} className={styles.resultCollocChip}>{c}</span>
                           ))}
                         </div>
                       )}
                       <button
+                        className={`${styles.saveBtn} ${isSaved ? styles.saveBtnSaved : ''}`}
                         onClick={() => saveWord(w)}
                         disabled={isSaved || savingId === w.id}
-                        style={{
-                          width: '100%', padding: '8px', borderRadius: 6, cursor: isSaved ? 'default' : 'pointer',
-                          background: isSaved ? `${C.green}15` : `${C.accent}10`,
-                          border: `0.5px solid ${isSaved ? `${C.green}40` : C.border2}`,
-                          color: isSaved ? C.green : C.accent, fontSize: 11,
-                        }}>
-                        {savingId === w.id ? '⏳ Saqlanmoqda...' : isSaved ? '✅ Saqlandi' : '+ Vocabularyga qo\'shish'}
+                      >
+                        {savingId === w.id ? 'Saqlanmoqda...' : isSaved ? <><IconCheck /> Saqlandi</> : <><IconPlus /> Vocabularyga qo'shish</>}
                       </button>
                     </div>
                   )
@@ -400,21 +397,21 @@ export default function MyVocabPage() {
             )}
 
             {searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: C.text2 }}>
-                <div style={{ fontSize: 36, marginBottom: 10, opacity: 0.3 }}>🔍</div>
-                <div style={{ fontSize: 13 }}>"{searchQuery}" topilmadi</div>
+              <div className={styles.noResultsMsg}>
+                <IconSearch className={styles.searchIconBig} />
+                "{searchQuery}" topilmadi
               </div>
             )}
 
             {searchQuery.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: C.text2 }}>
-                <div style={{ fontSize: 36, marginBottom: 10, opacity: 0.2 }}>🔍</div>
-                <div style={{ fontSize: 13 }}>So'z yozing — avtomatik qidiriladi</div>
+              <div className={styles.emptyPromptMsg}>
+                <IconSearch className={styles.searchIconBig} />
+                So'z yozing — avtomatik qidiriladi
               </div>
             )}
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

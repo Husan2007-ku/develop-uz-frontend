@@ -1,12 +1,11 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-
-const C = {
-  bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
-  border: 'rgba(0,245,255,0.15)', border2: 'rgba(0,245,255,0.3)',
-  text: '#e2e8f0', text2: '#94a3b8',
-  accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
-}
+import GlassBackground from '@/components/GlassBackground'
+import {
+  IconTrophy, IconClock, IconEssay, IconLock, IconBot, IconSend,
+  IconCheck, IconTarget, IconX, IconRefresh,
+} from '@/components/Icons'
+import styles from './mock.module.css'
 
 const API = 'https://develop-uz-api.onrender.com'
 
@@ -44,6 +43,13 @@ const MOCK_QUESTIONS = [
 ]
 
 const TIME_LIMIT = 40 * 60 // 40 daqiqa
+
+const RULES = [
+  { Icon: IconClock, title: '40 daqiqa', desc: "Vaqtni to'xtatib bo'lmaydi" },
+  { Icon: IconEssay, title: "Kamida 250 so'z", desc: 'Task 2 talabi' },
+  { Icon: IconLock, title: "Chiqib bo'lmaydi", desc: 'Sahifadan ketsa, imtihon tugaydi' },
+  { Icon: IconBot, title: 'AI baho', desc: 'Topshirgach band va feedback' },
+]
 
 export default function MockPage() {
   const [stage, setStage] = useState('intro') // intro | exam | result
@@ -123,133 +129,81 @@ export default function MockPage() {
   const wordCount = text.trim().split(/\s+/).filter(Boolean).length
   const spentMins = Math.floor((TIME_LIMIT - timeLeft) / 60)
   const spentSecs = (TIME_LIMIT - timeLeft) % 60
+  const timerColor = timeLeft < 300 ? 'var(--on-red)' : timeLeft < 600 ? 'var(--gem-orange)' : 'var(--gem-blue)'
 
   return (
-    <main style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
+    <div className={styles.wrapper}>
+      <GlassBackground />
 
       {/* INTRO */}
       {stage === 'intro' && (
-        <>
-          <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '16px 24px' }}>
-            <h1 style={{ fontSize: 22, fontWeight: 500, color: C.accent, marginBottom: 3 }}>🏆 Mock Imtihon</h1>
-            <p style={{ fontSize: 12, color: C.text2 }}>Haqiqiy IELTS sharoitida yozing — vaqt, mavzu, AI baho</p>
+        <div className={styles.introInner}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>
+              <span className={styles.titleIcon}><IconTrophy /></span>
+              Mock Imtihon
+            </h1>
+            <p className={styles.desc}>Haqiqiy IELTS sharoitida yozing — vaqt, mavzu, AI baho</p>
           </div>
 
-          <div style={{ maxWidth: 720, margin: '40px auto', padding: '0 24px' }}>
-            <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 14, padding: 32 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 500, marginBottom: 20, color: C.text }}>
-                Imtihon boshlamishdan oldin
-              </h2>
+          <div className={`glassPanel ${styles.introCard}`}>
+            <h2 className={styles.introHeading}>Imtihon boshlamishdan oldin</h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
-                {[
-                  { icon: '⏱️', title: '40 daqiqa', desc: 'Vaqtni to\'xtatib bo\'lmaydi' },
-                  { icon: '📝', title: 'Kamida 250 so\'z', desc: 'Task 2 talabi' },
-                  { icon: '🔒', title: 'Chiqib bo\'lmaydi', desc: 'Sahifadan ketsa, imtihon tugaydi' },
-                  { icon: '🤖', title: 'AI baho', desc: 'Topshirgach band va feedback' },
-                ].map((r, i) => (
-                  <div key={i} style={{
-                    background: C.bg, border: `0.5px solid ${C.border}`,
-                    borderRadius: 10, padding: 14, display: 'flex', gap: 12, alignItems: 'flex-start'
-                  }}>
-                    <span style={{ fontSize: 22, flexShrink: 0 }}>{r.icon}</span>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{r.title}</div>
-                      <div style={{ fontSize: 11, color: C.text2 }}>{r.desc}</div>
-                    </div>
+            <div className={styles.ruleGrid}>
+              {RULES.map((r, i) => (
+                <div key={i} className={`glassPanel ${styles.ruleCard}`}>
+                  <span className={styles.ruleIcon}><r.Icon /></span>
+                  <div>
+                    <div className={styles.ruleTitle}>{r.title}</div>
+                    <div className={styles.ruleDesc}>{r.desc}</div>
                   </div>
-                ))}
-              </div>
-
-              <div style={{
-                background: 'rgba(239,68,68,0.08)', border: '0.5px solid rgba(239,68,68,0.3)',
-                borderRadius: 10, padding: 14, marginBottom: 24
-              }}>
-                <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 500, marginBottom: 6 }}>
-                  ⚠️ Diqqat
                 </div>
-                <div style={{ fontSize: 12, color: C.text2, lineHeight: 1.6 }}>
-                  Mavzuni siz tanlay olmaysiz — tizim tasodifiy tanlaydi.
-                  Vaqt tugasa, yozganingiz avtomatik topshiriladi.
-                  Imtihon davomida boshqa sahifaga o'tishga urinmang.
-                </div>
-              </div>
-
-              <button onClick={startExam} style={{
-                width: '100%', padding: 14, borderRadius: 10, border: 'none',
-                background: C.accent, color: C.bg,
-                fontSize: 15, fontWeight: 500, cursor: 'pointer'
-              }}>
-                🏆 Imtihonni boshlash
-              </button>
+              ))}
             </div>
+
+            <div className={styles.warningBox}>
+              <div className={styles.warningTitle}>Diqqat</div>
+              <div className={styles.warningText}>
+                Mavzuni siz tanlay olmaysiz — tizim tasodifiy tanlaydi.
+                Vaqt tugasa, yozganingiz avtomatik topshiriladi.
+                Imtihon davomida boshqa sahifaga o'tishga urinmang.
+              </div>
+            </div>
+
+            <button className={styles.startBtn} onClick={startExam}>
+              <IconTrophy /> Imtihonni boshlash
+            </button>
           </div>
-        </>
+        </div>
       )}
 
       {/* EXAM */}
       {stage === 'exam' && (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className={styles.examWrapper}>
+          <div className={styles.examHeader}>
+            <div className={styles.examTitle}>Mock Imtihon — {question?.topic}</div>
 
-          {/* Exam header */}
-          <div style={{
-            background: C.bg3, borderBottom: `1px solid ${C.border}`,
-            padding: '12px 24px', display: 'flex',
-            alignItems: 'center', justifyContent: 'space-between', flexShrink: 0
-          }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>
-              🏆 Mock Imtihon — {question?.topic}
-            </div>
-
-            {/* Timer */}
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                fontSize: 28, fontWeight: 500,
-                color: timeLeft < 300 ? '#ef4444' : timeLeft < 600 ? C.amber : C.accent,
-              }}>
+            <div className={styles.timerWrap}>
+              <div className={styles.timerNum} style={{ color: timerColor }}>
                 {mins}:{secs.toString().padStart(2, '0')}
               </div>
-              <div style={{ height: 4, width: 120, background: 'rgba(255,255,255,0.1)', borderRadius: 2, margin: '4px auto 0' }}>
-                <div style={{
-                  height: 4, borderRadius: 2,
-                  width: `${timePercent}%`,
-                  background: timeLeft < 300 ? '#ef4444' : timeLeft < 600 ? C.amber : C.accent,
-                  transition: 'width 1s linear'
-                }} />
+              <div className={styles.timerTrack}>
+                <div className={styles.timerFill} style={{ width: `${timePercent}%`, background: timerColor }} />
               </div>
             </div>
 
-            <div style={{ fontSize: 12, color: C.text2 }}>
-              {wordCount} so'z
-            </div>
+            <div className={styles.wordCountTag}>{wordCount} so'z</div>
           </div>
 
-          {/* Exam body */}
-          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', overflow: 'hidden' }}>
+          <div className={styles.examBody}>
+            <div className={styles.questionPane}>
+              <div className={styles.questionTag}>Writing {question?.type} — {question?.topic}</div>
 
-            {/* Question */}
-            <div style={{
-              borderRight: `1px solid ${C.border}`,
-              padding: 24, overflowY: 'auto',
-              background: C.bg
-            }}>
-              <div style={{
-                display: 'inline-block', fontSize: 11, padding: '3px 10px',
-                borderRadius: 4, background: `${C.accent}10`, color: C.accent,
-                fontFamily: 'monospace', marginBottom: 16
-              }}>Writing {question?.type} — {question?.topic}</div>
+              <div className={`glassPanel ${styles.questionBox}`}>{question?.question}</div>
 
-              <div style={{
-                fontSize: 13, color: C.text, lineHeight: 1.9,
-                padding: 16, background: C.bg2,
-                border: `0.5px solid ${C.border}`, borderRadius: 10
-              }}>
-                {question?.question}
-              </div>
-
-              <div style={{ marginTop: 16, padding: 14, background: 'rgba(0,245,255,0.04)', borderRadius: 10 }}>
-                <div style={{ fontSize: 11, color: C.accent, marginBottom: 8 }}>📋 Eslatma</div>
-                <div style={{ fontSize: 11, color: C.text2, lineHeight: 1.7 }}>
+              <div className={styles.noteBox}>
+                <div className={styles.noteLbl}>Eslatma</div>
+                <div className={styles.noteText}>
                   • Kamida 250 so'z yozing<br />
                   • Fikringizni aniq va mantiqiy ifodalang<br />
                   • Misollar keltiring<br />
@@ -258,32 +212,19 @@ export default function MockPage() {
               </div>
             </div>
 
-            {/* Writing area */}
-            <div style={{ display: 'flex', flexDirection: 'column', background: C.bg }}>
+            <div className={styles.writingPane}>
               <textarea
                 value={text}
                 onChange={e => setText(e.target.value)}
                 placeholder="Essayingizni shu yerga yozing..."
-                style={{
-                  flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                  padding: 24, color: C.text, fontSize: 14, lineHeight: 1.9,
-                  resize: 'none', fontFamily: 'inherit'
-                }}
+                className={styles.writeArea}
               />
-              <div style={{
-                padding: '12px 24px', borderTop: `1px solid ${C.border}`,
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-              }}>
-                <span style={{ fontSize: 11, color: wordCount >= 250 ? C.green : C.text2 }}>
-                  {wordCount} / 250 so'z {wordCount >= 250 ? '✅' : ''}
+              <div className={styles.writeFooter}>
+                <span className={`${styles.wordCountLbl} ${wordCount >= 250 ? styles.wordCountLblDone : ''}`}>
+                  {wordCount} / 250 so'z
                 </span>
-                <button onClick={submitExam} disabled={wordCount < 30 || loading} style={{
-                  padding: '10px 24px', borderRadius: 8, border: 'none',
-                  background: wordCount >= 30 ? '#ef4444' : 'rgba(255,255,255,0.05)',
-                  color: '#fff', fontSize: 13, fontWeight: 500,
-                  cursor: wordCount >= 30 ? 'pointer' : 'not-allowed'
-                }}>
-                  {loading ? '⏳ Baholanmoqda...' : '✅ Topshirish'}
+                <button className={styles.submitBtn} onClick={submitExam} disabled={wordCount < 30 || loading}>
+                  <IconSend /> {loading ? 'Baholanmoqda...' : 'Topshirish'}
                 </button>
               </div>
             </div>
@@ -293,136 +234,88 @@ export default function MockPage() {
 
       {/* RESULT */}
       {stage === 'result' && (
-        <>
-          <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '16px 24px' }}>
-            <h1 style={{ fontSize: 22, fontWeight: 500, color: C.accent, marginBottom: 3 }}>📊 Natijalar</h1>
-            <p style={{ fontSize: 12, color: C.text2 }}>AI baholash yakunlandi</p>
+        <div className={styles.resultInner}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>
+              <span className={styles.titleIcon}><IconTrophy /></span>
+              Natijalar
+            </h1>
+            <p className={styles.desc}>AI baholash yakunlandi</p>
           </div>
 
-          <div style={{ maxWidth: 860, margin: '0 auto', padding: '24px 24px' }}>
-
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '60px 0', color: C.text2 }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>⏳</div>
-                <p>AI baholamoqda...</p>
+          {loading ? (
+            <div className={styles.centerBox}>AI baholamoqda...</div>
+          ) : (
+            <>
+              <div className={styles.scoreGrid}>
+                <div className={`glassPanel ${styles.scoreCard}`}>
+                  <div className={styles.scoreCardLbl}>Band</div>
+                  <div className={styles.scoreCardVal} style={{ color: 'var(--gem-blue)' }}>{feedback?.band || '—'}</div>
+                </div>
+                <div className={`glassPanel ${styles.scoreCard}`}>
+                  <div className={styles.scoreCardLbl}>Yozish vaqti</div>
+                  <div className={styles.scoreCardValSm} style={{ color: 'var(--on-green)' }}>
+                    {spentMins}:{spentSecs.toString().padStart(2, '0')}
+                  </div>
+                </div>
+                <div className={`glassPanel ${styles.scoreCard}`}>
+                  <div className={styles.scoreCardLbl}>So'zlar soni</div>
+                  <div className={styles.scoreCardValSm} style={{ color: 'var(--on-orange)' }}>{wordCount}</div>
+                </div>
               </div>
-            ) : (
-              <>
-                {/* Scores */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 20 }}>
-                  <div style={{
-                    background: C.bg2, border: `0.5px solid ${C.accent}40`,
-                    borderRadius: 12, padding: 20, textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: 11, color: C.text2, marginBottom: 4 }}>Band</div>
-                    <div style={{ fontSize: 40, fontWeight: 500, color: C.accent }}>
-                      {feedback?.band || '—'}
-                    </div>
-                  </div>
-                  <div style={{
-                    background: C.bg2, border: `0.5px solid ${C.green}40`,
-                    borderRadius: 12, padding: 20, textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: 11, color: C.text2, marginBottom: 4 }}>Yozish vaqti</div>
-                    <div style={{ fontSize: 28, fontWeight: 500, color: C.green }}>
-                      {spentMins}:{spentSecs.toString().padStart(2, '0')}
-                    </div>
-                  </div>
-                  <div style={{
-                    background: C.bg2, border: `0.5px solid ${C.amber}40`,
-                    borderRadius: 12, padding: 20, textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: 11, color: C.text2, marginBottom: 4 }}>So'zlar soni</div>
-                    <div style={{ fontSize: 28, fontWeight: 500, color: C.amber }}>{wordCount}</div>
-                  </div>
+
+              <div className={`glassPanel ${styles.qaBox}`}>
+                <div className={styles.qaLbl}>Savol:</div>
+                <div className={styles.qaText}>{question?.question}</div>
+              </div>
+
+              {feedback?.feedback_uz && (
+                <div className={styles.aiBox}>
+                  <div className={styles.aiLbl}><IconBot /> AI umumiy baholash:</div>
+                  <div className={styles.aiText}>{feedback.feedback_uz}</div>
                 </div>
+              )}
 
-                {/* Savol */}
-                <div style={{
-                  background: C.bg2, border: `0.5px solid ${C.border}`,
-                  borderRadius: 10, padding: 16, marginBottom: 16
-                }}>
-                  <div style={{ fontSize: 11, color: C.text2, marginBottom: 6 }}>Savol:</div>
-                  <div style={{ fontSize: 13, color: C.text, lineHeight: 1.7 }}>{question?.question}</div>
-                </div>
-
-                {/* Feedback */}
-                {feedback?.feedback_uz && (
-                  <div style={{
-                    background: `${C.accent}05`, border: `0.5px solid ${C.border2}`,
-                    borderRadius: 10, padding: 16, marginBottom: 16
-                  }}>
-                    <div style={{ fontSize: 12, color: C.accent, fontWeight: 500, marginBottom: 8 }}>
-                      🤖 AI umumiy baholash:
-                    </div>
-                    <div style={{ fontSize: 13, color: C.text, lineHeight: 1.7 }}>{feedback.feedback_uz}</div>
-                  </div>
-                )}
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-                  {feedback?.good_phrases?.length > 0 && (
-                    <div style={{
-                      background: C.bg2, border: `0.5px solid ${C.green}30`,
-                      borderRadius: 10, padding: 14
-                    }}>
-                      <div style={{ fontSize: 12, color: C.green, fontWeight: 500, marginBottom: 8 }}>
-                        ✅ Kuchli tomonlar:
-                      </div>
-                      {feedback.good_phrases.map((p, i) => (
-                        <div key={i} style={{ fontSize: 12, color: C.text, paddingLeft: 10, marginBottom: 4 }}>• {p}</div>
-                      ))}
-                    </div>
-                  )}
-                  {feedback?.improve_suggestions?.length > 0 && (
-                    <div style={{
-                      background: C.bg2, border: `0.5px solid ${C.amber}30`,
-                      borderRadius: 10, padding: 14
-                    }}>
-                      <div style={{ fontSize: 12, color: C.amber, fontWeight: 500, marginBottom: 8 }}>
-                        💡 Yaxshilash kerak:
-                      </div>
-                      {feedback.improve_suggestions.map((p, i) => (
-                        <div key={i} style={{ fontSize: 12, color: C.text, paddingLeft: 10, marginBottom: 4 }}>• {p}</div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {feedback?.grammar_issues?.length > 0 && (
-                  <div style={{
-                    background: C.bg2, border: `0.5px solid rgba(239,68,68,0.3)`,
-                    borderRadius: 10, padding: 14, marginBottom: 16
-                  }}>
-                    <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 500, marginBottom: 8 }}>
-                      ⚠️ Grammatika xatolari:
-                    </div>
-                    {feedback.grammar_issues.map((p, i) => (
-                      <div key={i} style={{ fontSize: 12, color: C.text, paddingLeft: 10, marginBottom: 4 }}>• {p}</div>
+              <div className={styles.dualGrid}>
+                {feedback?.good_phrases?.length > 0 && (
+                  <div className={styles.goodBox}>
+                    <div className={`${styles.boxLbl} ${styles.goodLbl}`}><IconCheck /> Kuchli tomonlar:</div>
+                    {feedback.good_phrases.map((p, i) => (
+                      <div key={i} className={styles.listItem}>• {p}</div>
                     ))}
                   </div>
                 )}
+                {feedback?.improve_suggestions?.length > 0 && (
+                  <div className={styles.improveBox}>
+                    <div className={`${styles.boxLbl} ${styles.improveLbl}`}><IconTarget /> Yaxshilash kerak:</div>
+                    {feedback.improve_suggestions.map((p, i) => (
+                      <div key={i} className={styles.listItem}>• {p}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                {/* Yozilgan essay */}
-                <div style={{
-                  background: C.bg2, border: `0.5px solid ${C.border}`,
-                  borderRadius: 10, padding: 16, marginBottom: 20
-                }}>
-                  <div style={{ fontSize: 12, color: C.text2, marginBottom: 10 }}>Sizning essayingiz:</div>
-                  <div style={{ fontSize: 13, color: C.text, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{text}</div>
+              {feedback?.grammar_issues?.length > 0 && (
+                <div className={styles.grammarBox}>
+                  <div className={styles.grammarLbl}><IconX /> Grammatika xatolari:</div>
+                  {feedback.grammar_issues.map((p, i) => (
+                    <div key={i} className={styles.listItem}>• {p}</div>
+                  ))}
                 </div>
+              )}
 
-                <button onClick={() => { setStage('intro'); setFeedback(null); setText('') }} style={{
-                  width: '100%', padding: 14, borderRadius: 10, border: 'none',
-                  background: C.accent, color: C.bg,
-                  fontSize: 14, fontWeight: 500, cursor: 'pointer'
-                }}>
-                  🔄 Yangi Mock Imtihon
-                </button>
-              </>
-            )}
-          </div>
-        </>
+              <div className={`glassPanel ${styles.essayBox}`}>
+                <div className={styles.essayLbl}>Sizning essayingiz:</div>
+                <div className={styles.essayText}>{text}</div>
+              </div>
+
+              <button className={styles.retryBtn} onClick={() => { setStage('intro'); setFeedback(null); setText('') }}>
+                <IconRefresh /> Yangi Mock Imtihon
+              </button>
+            </>
+          )}
+        </div>
       )}
-    </main>
+    </div>
   )
 }

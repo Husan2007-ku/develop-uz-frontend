@@ -1,12 +1,37 @@
 'use client'
 import { useState, useEffect } from 'react'
+import GlassBackground from '@/components/GlassBackground'
+import {
+  IconCards, IconEssay, IconWord, IconPencil, IconRepeat, IconEye,
+  IconCheck, IconX, IconRefresh, IconArrowRight, IconSend,
+} from '@/components/Icons'
+import styles from './study.module.css'
 
-const C = {
-  bg: '#0D1117', bg2: '#0d1f2d', bg3: '#0a1628',
-  border: 'rgba(0,245,255,0.15)', border2: 'rgba(0,245,255,0.3)',
-  text: '#e2e8f0', text2: '#94a3b8',
-  accent: '#00F5FF', amber: '#F59E0B', green: '#93E9BE',
+const MODE_TONE = {
+  flashcard: { bg: 'var(--t-blue)', fg: 'var(--on-blue)' },
+  cloze: { bg: 'var(--t-violet)', fg: 'var(--on-violet)' },
+  quiz: { bg: 'var(--t-green)', fg: 'var(--on-green)' },
+  writing: { bg: 'var(--t-orange)', fg: 'var(--on-orange)' },
 }
+
+const LEVEL_TONE = {
+  B2: { bg: 'var(--t-green)', fg: 'var(--on-green)' },
+  C1: { bg: 'var(--t-blue)', fg: 'var(--on-blue)' },
+  C2: { bg: 'var(--t-violet)', fg: 'var(--on-violet)' },
+}
+
+const MODES = [
+  { id: 'flashcard', Icon: IconCards, title: 'Flashcard', desc: "So'zni ko'r, tarjimasini bil", tag: 'SM-2' },
+  { id: 'cloze', Icon: IconEssay, title: 'Cloze Test', desc: "Bo'sh joyni to'ldiring", tag: 'Kontekst' },
+  { id: 'quiz', Icon: IconWord, title: 'Kontekst Quiz', desc: "To'g'ri so'zni tanlang", tag: "Ko'p tanlov" },
+  { id: 'writing', Icon: IconPencil, title: 'Writing Practice', desc: "5 so'zdan paragraf yozing", tag: 'AI tekshiruv' },
+]
+
+const LEVELS = [
+  { level: 'B2', title: 'Upper-Intermediate', desc: 'Band 5.5–6.5 uchun', words: ['significant', 'contribute', 'establish'] },
+  { level: 'C1', title: 'Advanced', desc: 'Band 7–7.5 uchun', words: ['facilitate', 'exacerbate', 'prevalent'] },
+  { level: 'C2', title: 'Proficiency', desc: 'Band 8–9 uchun', words: ['ubiquitous', 'unprecedented', 'disseminate'] },
+]
 
 export default function StudyPage() {
   const [mode, setMode] = useState(null)
@@ -70,115 +95,83 @@ export default function StudyPage() {
   const word = words[current]
   const finished = current >= words.length && words.length > 0
 
-  const card = {
-    background: C.bg2, border: `0.5px solid ${C.border}`,
-    borderRadius: 12, padding: 20
-  }
-
-  const modes = [
-    { id: 'flashcard', icon: '🃏', title: 'Flashcard', desc: "So'zni ko'r, tarjimasini bil", tag: 'SM-2', color: C.accent },
-    { id: 'cloze', icon: '📝', title: 'Cloze Test', desc: "Bo'sh joyni to'ldiring", tag: 'Kontekst', color: '#9b5de5' },
-    { id: 'quiz', icon: '🔤', title: 'Kontekst Quiz', desc: "To'g'ri so'zni tanlang", tag: "Ko'p tanlov", color: C.green },
-    { id: 'writing', icon: '✏️', title: 'Writing Practice', desc: '5 so\'zdan paragraf yozing', tag: 'AI tekshiruv', color: C.amber },
-  ]
-
   return (
-    <main style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
-      {/* Header */}
-      <div style={{ background: C.bg3, borderBottom: `1px solid ${C.border}`, padding: '16px 24px' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: C.accent, marginBottom: 3 }}>✍️ Study Zone</h1>
-        <p style={{ fontSize: 12, color: C.text2 }}>So'zlarni ilmiy usulda yodlang — Spaced Repetition bilan</p>
-      </div>
+    <div className={styles.wrapper}>
+      <GlassBackground />
+      <div className={styles.inner}>
 
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 24px' }}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>
+            <span className={styles.titleIcon}><IconRepeat /></span>
+            Study Zone
+          </h1>
+          <p className={styles.desc}>So'zlarni ilmiy usulda yodlang — Spaced Repetition bilan</p>
+        </div>
 
         {/* Mode tanlash */}
         {!mode && (
           <>
-            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 16, color: C.text2 }}>Rejim tanlang</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 32 }}>
-              {modes.map(m => (
-                <div key={m.id} onClick={() => setMode(m.id)} style={{
-                  ...card, cursor: 'pointer', transition: 'all 0.2s'
-                }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = m.color}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = C.border}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                    <span style={{ fontSize: 28 }}>{m.icon}</span>
-                    <span style={{
-                      fontSize: 10, padding: '2px 8px', borderRadius: 4, fontFamily: 'monospace',
-                      background: `${m.color}18`, color: m.color, border: `0.5px solid ${m.color}40`
-                    }}>{m.tag}</span>
+            <div className={styles.sectionLbl}>Rejim tanlang</div>
+            <div className={styles.modeGrid}>
+              {MODES.map(m => {
+                const tone = MODE_TONE[m.id]
+                return (
+                  <div key={m.id} className={`glassPanel ${styles.modeCard}`} onClick={() => setMode(m.id)}>
+                    <div className={styles.modeTop}>
+                      <span className={styles.modeIcon} style={{ background: tone.bg, color: tone.fg }}><m.Icon /></span>
+                      <span className={styles.modeTag} style={{ background: tone.bg, color: tone.fg }}>{m.tag}</span>
+                    </div>
+                    <div className={styles.modeTitle}>{m.title}</div>
+                    <div className={styles.modeDesc}>{m.desc}</div>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>{m.title}</div>
-                  <div style={{ fontSize: 12, color: C.text2 }}>{m.desc}</div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
-            {/* CEFR darajalar */}
-            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 16, color: C.text2 }}>📊 CEFR darajalari</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10 }}>
-              {[
-                { level: 'B2', title: 'Upper-Intermediate', desc: 'Band 5.5–6.5 uchun', color: C.green, words: ['significant', 'contribute', 'establish'] },
-                { level: 'C1', title: 'Advanced', desc: 'Band 7–7.5 uchun', color: C.accent, words: ['facilitate', 'exacerbate', 'prevalent'] },
-                { level: 'C2', title: 'Proficiency', desc: 'Band 8–9 uchun', color: '#9b5de5', words: ['ubiquitous', 'unprecedented', 'disseminate'] },
-              ].map(lv => (
-                <div key={lv.level} style={{ ...card }}>
-                  <div style={{
-                    display: 'inline-block', fontSize: 12, fontWeight: 500,
-                    padding: '3px 10px', borderRadius: 4,
-                    background: `${lv.color}15`, color: lv.color,
-                    border: `0.5px solid ${lv.color}40`, marginBottom: 8
-                  }}>{lv.level} — {lv.title}</div>
-                  <div style={{ fontSize: 11, color: C.text2, marginBottom: 10 }}>{lv.desc}</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                    {lv.words.map(w => (
-                      <span key={w} style={{
-                        fontSize: 10, padding: '2px 7px', borderRadius: 4,
-                        background: 'rgba(255,255,255,0.05)', color: C.text2,
-                        fontFamily: 'monospace'
-                      }}>{w}</span>
-                    ))}
+            <div className={styles.sectionLbl}>CEFR darajalari</div>
+            <div className={styles.levelGrid}>
+              {LEVELS.map(lv => {
+                const tone = LEVEL_TONE[lv.level]
+                return (
+                  <div key={lv.level} className={`glassPanel ${styles.levelCard}`}>
+                    <span className={styles.levelBadge} style={{ background: tone.bg, color: tone.fg }}>{lv.level} — {lv.title}</span>
+                    <div className={styles.levelDesc}>{lv.desc}</div>
+                    <div className={styles.levelWords}>
+                      {lv.words.map(w => <span key={w} className={styles.levelWord}>{w}</span>)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </>
         )}
 
         {/* Loading */}
         {mode && loading && (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: C.text2 }}>
-            <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.5 }}>⏳</div>
-            <p style={{ fontSize: 13 }}>So'zlar yuklanmoqda...</p>
-          </div>
+          <div className={styles.centerBox}>So'zlar yuklanmoqda...</div>
         )}
 
         {/* Tugadi */}
         {mode && !loading && finished && (
-          <div style={{ textAlign: 'center', padding: '60px 0' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
-            <h2 style={{ fontSize: 22, fontWeight: 500, marginBottom: 16 }}>Sessiya tugadi!</h2>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 24 }}>
-              <div style={{ ...card, padding: '16px 28px', borderColor: `${C.green}40` }}>
-                <div style={{ fontSize: 28, fontWeight: 500, color: C.green }}>{score.correct}</div>
-                <div style={{ fontSize: 11, color: C.text2 }}>To'g'ri</div>
+          <div className={styles.centerBox}>
+            <h2 className={styles.finishedTitle}>Sessiya tugadi!</h2>
+            <div className={styles.scoreRow}>
+              <div className={`glassPanel ${styles.scoreCard}`}>
+                <div className={styles.scoreNum} style={{ color: 'var(--on-green)' }}>{score.correct}</div>
+                <div className={styles.scoreLbl}>To'g'ri</div>
               </div>
-              <div style={{ ...card, padding: '16px 28px', borderColor: 'rgba(239,68,68,0.3)' }}>
-                <div style={{ fontSize: 28, fontWeight: 500, color: '#ef4444' }}>{score.wrong}</div>
-                <div style={{ fontSize: 11, color: C.text2 }}>Noto'g'ri</div>
+              <div className={`glassPanel ${styles.scoreCard}`}>
+                <div className={styles.scoreNum} style={{ color: 'var(--on-red)' }}>{score.wrong}</div>
+                <div className={styles.scoreLbl}>Noto'g'ri</div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-              <button onClick={() => { setMode(null); setWords([]) }} style={{
-                padding: '10px 20px', borderRadius: 8, border: `0.5px solid ${C.border}`,
-                background: 'transparent', color: C.text2, fontSize: 13, cursor: 'pointer'
-              }}>← Rejim tanlash</button>
-              <button onClick={loadWords} style={{
-                padding: '10px 20px', borderRadius: 8, border: 'none',
-                background: C.accent, color: C.bg, fontSize: 13, fontWeight: 500, cursor: 'pointer'
-              }}>🔄 Qayta boshlash</button>
+            <div className={styles.finishedActions}>
+              <button className={styles.ghostBtn} onClick={() => { setMode(null); setWords([]) }}>
+                <IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Rejim tanlash
+              </button>
+              <button className={styles.primaryBtn} onClick={loadWords}>
+                <IconRefresh /> Qayta boshlash
+              </button>
             </div>
           </div>
         )}
@@ -186,175 +179,127 @@ export default function StudyPage() {
         {/* FLASHCARD */}
         {mode === 'flashcard' && !loading && !finished && word && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <button onClick={() => setMode(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 13, cursor: 'pointer' }}>← Orqaga</button>
-              <span style={{ fontSize: 12, color: C.text2 }}>{current + 1} / {words.length}</span>
-              <span style={{ fontSize: 12 }}>
-                <span style={{ color: C.green }}>✅ {score.correct}</span>
-                {' · '}
-                <span style={{ color: '#ef4444' }}>❌ {score.wrong}</span>
+            <div className={styles.sessionHead}>
+              <button className={styles.backLink} onClick={() => setMode(null)}><IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Orqaga</button>
+              <span className={styles.counter}>{current + 1} / {words.length}</span>
+              <span className={styles.scoreInline}>
+                <span className={styles.scoreInlineGood}><IconCheck size={12} /> {score.correct}</span>
+                <span className={styles.scoreInlineBad}><IconX size={12} /> {score.wrong}</span>
               </span>
             </div>
-            <div style={{ ...card, textAlign: 'center', minHeight: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-              <div style={{ fontSize: 11, color: C.text2, fontFamily: 'monospace', marginBottom: 12 }}>
-                {word.cefr_level} · {word.word_type}
-              </div>
-              <div style={{ fontSize: 36, fontWeight: 500, color: C.accent, marginBottom: 12 }}>{word.word}</div>
+            <div className={`glassPanel ${styles.bigCard}`}>
+              <div className={styles.bigMeta}>{word.cefr_level} · {word.word_type}</div>
+              <div className={styles.bigWord}>{word.word}</div>
               {!showAnswer ? (
-                <button onClick={() => setShowAnswer(true)} style={{
-                  padding: '8px 20px', borderRadius: 8, border: `0.5px solid ${C.border}`,
-                  background: 'transparent', color: C.text2, fontSize: 12, cursor: 'pointer', marginTop: 8
-                }}>👁️ Javobni ko'rish</button>
+                <button className={styles.revealBtn} onClick={() => setShowAnswer(true)}><IconEye /> Javobni ko'rish</button>
               ) : (
                 <div>
-                  <div style={{ fontSize: 18, color: C.green, fontWeight: 500, marginBottom: 6 }}>
-                    🇺🇿 {word.translation_uz}
-                  </div>
-                  {word.example_1 && (
-                    <div style={{ fontSize: 12, color: C.text2, fontStyle: 'italic', maxWidth: 400 }}>
-                      "{word.example_1}"
-                    </div>
-                  )}
+                  <div className={styles.answerTranslation}>{word.translation_uz}</div>
+                  {word.example_1 && <div className={styles.answerExample}>"{word.example_1}"</div>}
                 </div>
               )}
             </div>
             {showAnswer && (
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={() => nextWord(false)} style={{
-                  flex: 1, padding: 14, borderRadius: 10,
-                  background: 'rgba(239,68,68,0.1)', border: '0.5px solid rgba(239,68,68,0.3)',
-                  color: '#ef4444', fontSize: 14, fontWeight: 500, cursor: 'pointer'
-                }}>❌ Bilmadim</button>
-                <button onClick={() => nextWord(true)} style={{
-                  flex: 1, padding: 14, borderRadius: 10,
-                  background: `${C.green}15`, border: `0.5px solid ${C.green}40`,
-                  color: C.green, fontSize: 14, fontWeight: 500, cursor: 'pointer'
-                }}>✅ Bildim</button>
+              <div className={styles.judgeRow}>
+                <button className={`${styles.judgeBtn} ${styles.judgeBad}`} onClick={() => nextWord(false)}><IconX /> Bilmadim</button>
+                <button className={`${styles.judgeBtn} ${styles.judgeGood}`} onClick={() => nextWord(true)}><IconCheck /> Bildim</button>
               </div>
             )}
           </div>
         )}
 
-{/* CLOZE TEST */}
-{mode === 'cloze' && !loading && !finished && word && (
-  <div>
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-      <button onClick={() => setMode(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 13, cursor: 'pointer' }}>← Orqaga</button>
-      <span style={{ fontSize: 12, color: C.text2 }}>{current + 1} / {words.length}</span>
-    </div>
+        {/* CLOZE TEST */}
+        {mode === 'cloze' && !loading && !finished && word && (
+          <div>
+            <div className={styles.sessionHead}>
+              <button className={styles.backLink} onClick={() => setMode(null)}><IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Orqaga</button>
+              <span className={styles.counter}>{current + 1} / {words.length}</span>
+            </div>
 
-    <div style={{ background: C.bg2, border: `0.5px solid ${C.border}`, borderRadius: 12, padding: 20, marginBottom: 16 }}>
-      <div style={{ fontSize: 11, color: C.text2, fontFamily: 'monospace', marginBottom: 12 }}>
-        {word.cefr_level} · Bo'sh joyni to'ldiring
-      </div>
+            <div className={`glassPanel ${styles.clozeCard}`}>
+              <div className={styles.bigMeta}>{word.cefr_level} · Bo'sh joyni to'ldiring</div>
 
-      {word.example_1 ? (
-        <p style={{ fontSize: 15, color: C.text, lineHeight: 1.8, marginBottom: 16 }}>
-          {word.example_1.replace(new RegExp(word.word, 'gi'), '________')}
-        </p>
-      ) : (
-        <p style={{ fontSize: 13, color: C.text2, fontStyle: 'italic', marginBottom: 16 }}>Misol gap mavjud emas</p>
-      )}
+              {word.example_1 ? (
+                <p className={styles.clozeSentence}>{word.example_1.replace(new RegExp(word.word, 'gi'), '________')}</p>
+              ) : (
+                <p className={styles.clozeSentenceMuted}>Misol gap mavjud emas</p>
+              )}
 
-      {/* Yozish maydoni */}
-      {!clozeShown && (
-        <div style={{ marginBottom: 12 }}>
-          <input
-            type="text"
-            placeholder="Javobingizni yozing..."
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                const val = e.target.value.trim().toLowerCase()
-                const correct = word.word.toLowerCase()
-                setClozeShown(true)
-                if (val === correct) {
-                  nextWord(true)
-                }
-              }
-            }}
-            style={{
-              width: '100%', padding: '10px 14px', borderRadius: 8,
-              border: `0.5px solid ${C.border2}`, background: C.bg,
-              color: C.text, fontSize: 14, outline: 'none', fontFamily: 'inherit'
-            }}
-            autoFocus
-          />
-          <div style={{ fontSize: 11, color: C.text2, marginTop: 6 }}>
-            Enter bosing — javobni tekshirish
+              {!clozeShown && (
+                <div className={styles.clozeInputRow}>
+                  <input
+                    type="text"
+                    placeholder="Javobingizni yozing..."
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        const val = e.target.value.trim().toLowerCase()
+                        const correct = word.word.toLowerCase()
+                        setClozeShown(true)
+                        if (val === correct) {
+                          nextWord(true)
+                        }
+                      }
+                    }}
+                    className={styles.clozeInput}
+                    autoFocus
+                  />
+                  <div className={styles.clozeInputHint}>Enter bosing — javobni tekshirish</div>
+                </div>
+              )}
+
+              {!clozeShown ? (
+                <button className={styles.revealBtn} onClick={() => setClozeShown(true)}><IconEye /> Javobni ko'rish</button>
+              ) : (
+                <div className={styles.clozeAnswerBox}>
+                  <p className={styles.clozeAnswerWord}>{word.word}</p>
+                  <p className={styles.clozeAnswerTranslation}>{word.translation_uz}</p>
+                </div>
+              )}
+            </div>
+
+            {clozeShown && (
+              <div className={styles.judgeRow}>
+                <button className={`${styles.judgeBtn} ${styles.judgeBad}`} onClick={() => nextWord(false)}><IconX /> Noto'g'ri</button>
+                <button className={`${styles.judgeBtn} ${styles.judgeGood}`} onClick={() => nextWord(true)}><IconCheck /> To'g'ri</button>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      {!clozeShown ? (
-        <button onClick={() => setClozeShown(true)} style={{
-          padding: '8px 20px', borderRadius: 8,
-          border: `0.5px solid rgba(149,76,233,0.4)`,
-          background: 'rgba(149,76,233,0.1)', color: '#9b5de5',
-          fontSize: 12, fontWeight: 500, cursor: 'pointer'
-        }}>💡 Javobni ko'rish</button>
-      ) : (
-        <div style={{
-          background: 'rgba(149,76,233,0.1)', border: '0.5px solid rgba(149,76,233,0.3)',
-          borderRadius: 8, padding: '10px 14px'
-        }}>
-          <p style={{ fontSize: 20, fontWeight: 500, color: '#9b5de5', marginBottom: 3 }}>{word.word}</p>
-          <p style={{ fontSize: 12, color: C.text2 }}>🇺🇿 {word.translation_uz}</p>
-        </div>
-      )}
-    </div>
-
-    {clozeShown && (
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button onClick={() => nextWord(false)} style={{
-          flex: 1, padding: 14, borderRadius: 10,
-          background: 'rgba(239,68,68,0.1)', border: '0.5px solid rgba(239,68,68,0.3)',
-          color: '#ef4444', fontSize: 14, fontWeight: 500, cursor: 'pointer'
-        }}>❌ Noto'g'ri</button>
-        <button onClick={() => nextWord(true)} style={{
-          flex: 1, padding: 14, borderRadius: 10,
-          background: `${C.green}15`, border: `0.5px solid ${C.green}40`,
-          color: C.green, fontSize: 14, fontWeight: 500, cursor: 'pointer'
-        }}>✅ To'g'ri</button>
-      </div>
-    )}
-  </div>
-)}
+        )}
 
         {/* QUIZ */}
         {mode === 'quiz' && !loading && !finished && word && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-              <button onClick={() => setMode(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 13, cursor: 'pointer' }}>← Orqaga</button>
-              <span style={{ fontSize: 12, color: C.text2 }}>{current + 1} / {words.length}</span>
-              <span style={{ fontSize: 12 }}>
-                <span style={{ color: C.green }}>✅ {score.correct}</span>
-                {' · '}
-                <span style={{ color: '#ef4444' }}>❌ {score.wrong}</span>
+            <div className={styles.sessionHead}>
+              <button className={styles.backLink} onClick={() => setMode(null)}><IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Orqaga</button>
+              <span className={styles.counter}>{current + 1} / {words.length}</span>
+              <span className={styles.scoreInline}>
+                <span className={styles.scoreInlineGood}><IconCheck size={12} /> {score.correct}</span>
+                <span className={styles.scoreInlineBad}><IconX size={12} /> {score.wrong}</span>
               </span>
             </div>
-            <div style={{ ...card, textAlign: 'center', marginBottom: 16 }}>
-              <div style={{ fontSize: 11, color: C.text2, fontFamily: 'monospace', marginBottom: 12 }}>To'g'ri so'zni tanlang</div>
-              <div style={{ fontSize: 20, color: C.green, fontWeight: 500, marginBottom: 6 }}>🇺🇿 {word.translation_uz}</div>
+            <div className={`glassPanel ${styles.bigCard}`}>
+              <div className={styles.bigMeta}>To'g'ri so'zni tanlang</div>
+              <div className={styles.answerTranslation}>{word.translation_uz}</div>
               {word.example_1 && (
-                <div style={{ fontSize: 12, color: C.text2, fontStyle: 'italic' }}>
-                  {word.example_1.replace(new RegExp(word.word, 'gi'), '________')}
-                </div>
+                <div className={styles.answerExample}>{word.example_1.replace(new RegExp(word.word, 'gi'), '________')}</div>
               )}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {quizOptions.map((opt, i) => (
-                <button key={i} onClick={() => {
-                  if (selected !== null) return
-                  setSelected(opt.word)
-                  setTimeout(() => nextWord(opt.word === word.word), 800)
-                }} style={{
-                  padding: '14px 10px', borderRadius: 10, fontSize: 14, fontWeight: 500, cursor: 'pointer',
-                  border: `0.5px solid ${selected === null ? C.border : opt.word === word.word ? `${C.green}60` : selected === opt.word ? 'rgba(239,68,68,0.4)' : C.border}`,
-                  background: selected === null ? 'transparent' : opt.word === word.word ? `${C.green}15` : selected === opt.word ? 'rgba(239,68,68,0.1)' : 'transparent',
-                  color: selected === null ? C.text : opt.word === word.word ? C.green : selected === opt.word ? '#ef4444' : C.text2,
-                  opacity: selected !== null && opt.word !== word.word && selected !== opt.word ? 0.4 : 1,
-                }}>{opt.word}</button>
-              ))}
+            <div className={styles.quizOptions}>
+              {quizOptions.map((opt, i) => {
+                let cls = styles.quizOption
+                if (selected !== null) {
+                  if (opt.word === word.word) cls = `${styles.quizOption} ${styles.quizOptionCorrect}`
+                  else if (selected === opt.word) cls = `${styles.quizOption} ${styles.quizOptionWrong}`
+                  else cls = `${styles.quizOption} ${styles.quizOptionDim}`
+                }
+                return (
+                  <button key={i} className={cls} onClick={() => {
+                    if (selected !== null) return
+                    setSelected(opt.word)
+                    setTimeout(() => nextWord(opt.word === word.word), 800)
+                  }}>{opt.word}</button>
+                )
+              })}
             </div>
           </div>
         )}
@@ -362,80 +307,66 @@ export default function StudyPage() {
         {/* WRITING */}
         {mode === 'writing' && !loading && words.length > 0 && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-              <button onClick={() => setMode(null)} style={{ background: 'none', border: 'none', color: C.text2, fontSize: 13, cursor: 'pointer' }}>← Orqaga</button>
-              <span style={{ fontSize: 12, color: C.text2 }}>5 so'z ishlatish kerak</span>
+            <div className={styles.sessionHead}>
+              <button className={styles.backLink} onClick={() => setMode(null)}><IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Orqaga</button>
+              <span className={styles.counter}>5 so'z ishlatish kerak</span>
             </div>
-            <div style={{ ...card, marginBottom: 12 }}>
-              <div style={{ fontSize: 12, color: C.text2, marginBottom: 10 }}>📌 Shu so'zlarni ishlating:</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <div className={`glassPanel ${styles.wordChipsCard}`}>
+              <div className={styles.wordChipsLbl}>Shu so'zlarni ishlating:</div>
+              <div className={styles.wordChipsRow}>
                 {words.slice(0, 5).map((w, i) => (
-                  <span key={i} style={{
-                    fontSize: 11, padding: '4px 10px', borderRadius: 6, fontFamily: 'monospace',
-                    background: `${C.accent}10`, color: C.accent, border: `0.5px solid ${C.border2}`
-                  }}>
-                    {w.word} <span style={{ color: C.text2 }}>— {w.translation_uz}</span>
-                  </span>
+                  <span key={i} className={styles.wordChip}>{w.word} <span>— {w.translation_uz}</span></span>
                 ))}
               </div>
             </div>
-            <textarea value={writingText} onChange={e => setWritingText(e.target.value)}
+            <textarea
+              value={writingText}
+              onChange={e => setWritingText(e.target.value)}
               placeholder="Shu 5 ta so'zni ishlatib 1 ta paragraf yozing..."
-              style={{
-                width: '100%', background: C.bg2, border: `0.5px solid ${C.border}`,
-                borderRadius: 10, padding: 14, color: C.text,
-                fontSize: 13, resize: 'none', height: 140, outline: 'none',
-                fontFamily: 'inherit', lineHeight: 1.7, marginBottom: 12
-              }} />
-            <button onClick={checkWriting} disabled={writingText.trim().length < 10} style={{
-              width: '100%', padding: 14, borderRadius: 10, border: 'none',
-              background: writingText.trim().length >= 10 ? C.amber : 'rgba(255,255,255,0.05)',
-              color: writingText.trim().length >= 10 ? C.bg : C.text2,
-              fontSize: 14, fontWeight: 500, cursor: writingText.trim().length >= 10 ? 'pointer' : 'not-allowed',
-              marginBottom: 12
-            }}>🤖 Tekshirish</button>
+              className={styles.writeTextarea}
+            />
+            <button className={styles.checkBtn} onClick={checkWriting} disabled={writingText.trim().length < 10}>
+              <IconSend /> Tekshirish
+            </button>
             {writingResult && (
-              <div style={{ ...card }}>
-                <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 12 }}>
-                  📊 Natija: <span style={{ color: C.accent }}>{writingResult.score}/100</span>
+              <div className={`glassPanel ${styles.resultCard}`}>
+                <div className={styles.resultScoreLbl}>
+                  Natija: <b>{writingResult.score}/100</b>
                 </div>
                 {writingResult.used.length > 0 && (
-                  <div style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 12, color: C.green, marginBottom: 6 }}>✅ Ishlatilgan ({writingResult.used.length}):</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  <div className={styles.resultSection}>
+                    <div className={`${styles.resultSectionLbl} ${styles.resultUsedLbl}`}>Ishlatilgan ({writingResult.used.length}):</div>
+                    <div className={styles.wordChipsRow}>
                       {writingResult.used.map((w, i) => (
-                        <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: `${C.green}15`, color: C.green, fontFamily: 'monospace' }}>{w.word}</span>
+                        <span key={i} className={`${styles.resultChip} ${styles.resultChipUsed}`}>{w.word}</span>
                       ))}
                     </div>
                   </div>
                 )}
                 {writingResult.missing.length > 0 && (
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 12, color: '#ef4444', marginBottom: 6 }}>❌ Ishlatilmagan ({writingResult.missing.length}):</div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  <div className={styles.resultSection}>
+                    <div className={`${styles.resultSectionLbl} ${styles.resultMissingLbl}`}>Ishlatilmagan ({writingResult.missing.length}):</div>
+                    <div className={styles.wordChipsRow}>
                       {writingResult.missing.map((w, i) => (
-                        <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 4, background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontFamily: 'monospace' }}>{w.word}</span>
+                        <span key={i} className={`${styles.resultChip} ${styles.resultChipMissing}`}>{w.word}</span>
                       ))}
                     </div>
                   </div>
                 )}
-                <div style={{
-                  padding: '10px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-                  background: writingResult.score === 100 ? `${C.green}15` : writingResult.score >= 60 ? `${C.accent}10` : 'rgba(239,68,68,0.1)',
-                  color: writingResult.score === 100 ? C.green : writingResult.score >= 60 ? C.accent : '#ef4444',
+                <div className={styles.resultFeedback} style={{
+                  background: writingResult.score === 100 ? 'var(--t-green)' : writingResult.score >= 60 ? 'var(--t-blue)' : 'var(--t-red)',
+                  color: writingResult.score === 100 ? 'var(--on-green)' : writingResult.score >= 60 ? 'var(--on-blue)' : 'var(--on-red)',
                 }}>
-                  {writingResult.score === 100 ? "🏆 Mukammal! Barcha so'zlarni ishlatdingiz!" : writingResult.score >= 60 ? '👍 Yaxshi! Bir oz mashq qiling.' : '💪 Davom eting! Ko\'proq mashq kerak.'}
+                  {writingResult.score === 100 ? "Mukammal! Barcha so'zlarni ishlatdingiz!" : writingResult.score >= 60 ? 'Yaxshi! Bir oz mashq qiling.' : "Davom eting! Ko'proq mashq kerak."}
                 </div>
-                <button onClick={() => { setWritingText(''); setWritingResult(null) }} style={{
-                  marginTop: 10, padding: '8px 16px', borderRadius: 8,
-                  border: `0.5px solid ${C.border}`, background: 'transparent',
-                  color: C.text2, fontSize: 12, cursor: 'pointer'
-                }}>🔄 Qayta yozish</button>
+                <button className={styles.retryBtn} onClick={() => { setWritingText(''); setWritingResult(null) }}>
+                  <IconRefresh /> Qayta yozish
+                </button>
               </div>
             )}
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

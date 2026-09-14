@@ -1,0 +1,108 @@
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 20px;
+  background: var(--glass);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border-bottom: 1px solid var(--glass-border-soft);
+}
+
+.left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.backBtn {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--glass); border: 1px solid var(--glass-border-soft);
+  color: var(--text-soft); cursor: pointer;
+}
+.backBtn:hover { color: var(--text); }
+.backBtn svg { width: 15px; height: 15px; }
+
+.brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.brandName {
+  font-family: var(--font-rubik), sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  background: var(--gem-gradient);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+.homeChip {
+  font-size: 0.72rem; color: var(--text-soft);
+  padding: 5px 11px; border-radius: 999px;
+  background: var(--glass); border: 1px solid var(--glass-border-soft);
+  text-decoration: none; white-space: nowrap;
+}
+.homeChip:hover { color: var(--text); }
+
+.center { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; justify-content: center; }
+
+.navItem { position: relative; }
+
+.navLink {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--text-soft);
+  padding: 7px 13px; border-radius: 999px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.navLink svg:first-child { width: 15px; height: 15px; }
+.navLink svg:last-child { width: 12px; height: 12px; opacity: 0.6; }
+.navLinkActive {
+  color: var(--text);
+  background: var(--glass);
+  border-color: var(--glass-border-soft);
+}
+
+.dropdown {
+  display: none;
+  position: absolute; top: 100%; left: 0; margin-top: 6px;
+  min-width: 230px; padding: 6px;
+  /* To'liq tiniq bo'lmagan (alpha yo'q) fon — orqadagi hero matni hech qanday
+     holatda "ko'rinib qolmasin" uchun. backdrop-filter atayin qo'yilmagan:
+     .bar'da ham blur bor, ikkitasi ustma-ust bo'lganda ba'zi brauzerlarda
+     orqa fon noto'g'ri composite bo'lib, shaffof ko'rinib qolishi mumkin edi. */
+  background: var(--dropdown-solid);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  isolation: isolate;
+}
+.navItem:hover .dropdown { display: block; }
+
+.dropLink {
+  display: block;
+  font-size: 0.78rem; color: var(--text-soft);
+  padding: 8px 12px; border-radius: 10px;
+  text-decoration: none;
+}
+.dropLink:hover { color: var(--text); background: var(--glass); }
+
+.right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.themeToggle {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--glass); border: 1px solid var(--glass-border-soft);
+  border-radius: 50%;
+  color: var(--text-soft);
+  cursor: pointer;
+  padding: 0;
+}
+.themeToggle:hover { color: var(--text); }
+.themeToggle svg { width: 15px; height: 15px; }
+.themeToggle svg[hidden] { display: none; }
+
+@media (max-width: 780px) {
+  .center { display: none; }
+}
