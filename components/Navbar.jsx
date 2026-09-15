@@ -4,36 +4,19 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useTheme } from '@/lib/theme-context'
 import styles from './Navbar.module.css'
 import {
-  IconPencil, IconCards, IconMic, IconGrid, IconChevronDown,
+  IconPencil, IconCards, IconMic, IconGrid,
   IconArrowRight, IconSun, IconMoon,
 } from '@/components/Icons'
 
+// Har biri BITTA kirish eshigi — ichki sahifalar (Grammar, Mock, Idea
+// Generator, AI Tahlil...) endi /essays sahifasining o'zi ichida ochiladi,
+// nav'da dropdown shart emas. Vocabulary'ning barcha sahifalari esa bosh
+// sahifada (/) kartochka sifatida ko'rsatiladi — bu yerda faqat bitta link.
 const navGroups = [
-  {
-    label: 'Writing',
-    href: '/essays',
-    icon: IconPencil,
-    children: [
-      { href: '/essays', label: 'Essays' },
-      { href: '/grammar', label: 'Grammar & Strukturalar' },
-      { href: '/idea-generator', label: 'Idea Generator' },
-      { href: '/ai-essay', label: 'AI Essay Tahlil' },
-      { href: '/mock', label: 'Mock Imtihon' },
-    ],
-  },
-  {
-    label: 'Vocabulary',
-    href: '/vocabulary',
-    icon: IconCards,
-    children: [
-      { href: '/vocabulary', label: 'Vocabulary Zone' },
-      { href: '/my-vocab', label: 'Mening Vocabularyim' },
-      { href: '/sample-collector', label: 'Sample Collector' },
-      { href: '/study', label: 'Flashcard & Study' },
-    ],
-  },
-  { label: 'Speaking', href: '/speaking', icon: IconMic, children: null },
-  { label: 'Dashboard', href: '/dashboard', icon: IconGrid, children: null },
+  { label: 'Writing', href: '/essays', icon: IconPencil },
+  { label: 'Speaking', href: '/speaking', icon: IconMic },
+  { label: 'Vocabulary', href: '/vocabulary', icon: IconCards },
+  { label: 'Dashboard', href: '/dashboard', icon: IconGrid },
 ]
 
 export default function Navbar() {
@@ -72,25 +55,14 @@ export default function Navbar() {
           const Icon = group.icon
           const active = pathname.startsWith(group.href)
           return (
-            <div key={group.href} className={styles.navItem}>
-              <Link
-                href={group.href}
-                className={`${styles.navLink} ${active ? styles.navLinkActive : ''}`}
-              >
-                <Icon />
-                {group.label}
-                {group.children && <IconChevronDown />}
-              </Link>
-              {group.children && (
-                <div className={styles.dropdown}>
-                  {group.children.map((child) => (
-                    <Link key={child.href} href={child.href} className={styles.dropLink}>
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Link
+              key={group.href}
+              href={group.href}
+              className={`${styles.navLink} ${active ? styles.navLinkActive : ''}`}
+            >
+              <Icon />
+              {group.label}
+            </Link>
           )
         })}
       </div>

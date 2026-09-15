@@ -2,25 +2,38 @@ import Link from 'next/link'
 import styles from './Home.module.css'
 import GlassBackground from '@/components/GlassBackground'
 import {
-  IconPencil, IconCards, IconMic, IconRepeat, IconBot, IconTrophy,
+  IconPencil, IconCards, IconMic, IconRepeat, IconBot, IconBook, IconSearch,
   IconEssay, IconWord, IconChart, IconTelegram, IconCheck, IconArrowRight,
 } from '@/components/Icons'
 
-const FEATURES = [
+// Ikki asosiy yo'nalish — har biri BITTA eshik. Ichkarida (Essays sahifasi
+// ichida Grammar/Idea Generator/AI Tahlil/Mock, Speaking sahifasi ichida
+// qolgan bosqichlar) o'zi ochiladi, bosh sahifada faqat shu ikkitasi turadi.
+const PILLARS = [
   {
-    icon: IconPencil, tag: 'Task 2', title: 'Writing Essaylar',
-    desc: "Band 6–9 gacha 1000+ real essay. Har biri tahlil qilingan, collocation va idiomlar belgilangan.",
+    icon: IconPencil, tag: 'Essays · Grammar · AI Tahlil · Mock', title: 'Writing',
+    desc: 'Band 8+ sample essaylar, AI tahlil, grammar strukturalar va mock imtihon — hammasi bitta joyda.',
     href: '/essays', tone: 'cBlue',
   },
+  {
+    icon: IconMic, tag: 'Part 1 · 2 · 3', title: 'Speaking',
+    desc: "Savol tanla, AI bilan gaplash, ball ol va o'sha yerdan yangi so'z/struktura yodla.",
+    href: '/speaking', tone: 'cViolet',
+  },
+]
+
+// Vocabulary — alohida hub emas, mavjud sahifalarning barchasi bosh sahifada
+// to'g'ridan-to'g'ri ko'rinadi (nav'dagi dropdown'dan shu yerga ko'chirildi).
+const VOCAB_FEATURES = [
   {
     icon: IconCards, tag: 'B2 · C1 · C2', title: 'Vocabulary Zone',
     desc: "10,000+ so'z CEFR darajalari bilan. O'zbek tarjimasi, misol jumlalar, word family.",
     href: '/vocabulary', tone: 'cGreen',
   },
   {
-    icon: IconMic, tag: 'Part 1 · 2 · 3', title: 'Speaking Tayyorgarlik',
-    desc: 'Part 1, 2, 3 uchun namuna javoblar. C1/C2 vocabulary va examiner maslahatlari bilan.',
-    href: '/speaking', tone: 'cViolet',
+    icon: IconBook, tag: 'Shaxsiy', title: 'Mening Vocabularyim',
+    desc: "O'zingiz saqlagan so'z va grammatikalar — Writing/Speaking'dan avtomatik tushganlari ham shu yerda.",
+    href: '/my-vocab', tone: 'cBlue',
   },
   {
     icon: IconRepeat, tag: 'SM-2 algoritm', title: 'Flashcard & Study',
@@ -28,14 +41,9 @@ const FEATURES = [
     href: '/study', tone: 'cOrange',
   },
   {
-    icon: IconBot, tag: 'Claude + Groq AI', title: 'AI Essay Tahlil',
-    desc: "Essayingizni yuboring yoki o'zingiz yozing. AI band skorini va tavsiyalar beradi.",
-    href: '/ai-essay', tone: 'cViolet',
-  },
-  {
-    icon: IconTrophy, tag: 'Real sharoit', title: 'Mock Imtihon',
-    desc: "Haqiqiy IELTS kabi: vaqt, mavzu, AI baho. Chiqib ketib bo'lmaydi.",
-    href: '/mock', tone: 'cOrange',
+    icon: IconSearch, tag: 'Beta', title: 'Sample Collector',
+    desc: "Namuna essay/javoblardan so'z va struktura yig'ish vositasi.",
+    href: '/sample-collector', tone: 'cViolet',
   },
 ]
 
@@ -113,14 +121,35 @@ export default function Home() {
           })}
         </div>
 
-        {/* FEATURES */}
+        {/* ASOSIY YO'NALISHLAR — Writing va Speaking, har biri bitta eshik */}
         <section className={styles.features}>
           <div className={styles.sectionHead}>
             <h2 className={styles.sectionTitle}>Faqat <span>kerakli narsalar</span></h2>
-            <p className={styles.sectionDesc}>Writing, Speaking va Vocabulary — ortiqcha hech narsa yo&apos;q</p>
+            <p className={styles.sectionDesc}>Writing va Speaking — ortiqcha hech narsa yo&apos;q</p>
           </div>
-          <div className={styles.featureGrid}>
-            {FEATURES.map((f) => {
+          <div className={styles.pillarGrid}>
+            {PILLARS.map((f) => {
+              const Icon = f.icon
+              return (
+                <Link key={f.title} href={f.href} className={`glassPanel ${styles.tile} ${styles.tileLg} ${styles[f.tone]}`}>
+                  <span className={styles.tileIcon}><Icon size={22} /></span>
+                  <span className={styles.tileTag}>{f.tag}</span>
+                  <h3>{f.title}</h3>
+                  <p>{f.desc}</p>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* VOCABULARY — nav dropdown'dan bosh sahifaga ko'chirildi, hammasi ochiq */}
+        <section className={styles.features}>
+          <div className={styles.sectionHead}>
+            <h2 className={styles.sectionTitle}><span>Vocabulary</span></h2>
+            <p className={styles.sectionDesc}>Writing va Speaking&apos;dan chiqqan so&apos;zlar ham avtomatik shu yerga tushadi</p>
+          </div>
+          <div className={styles.vocabGrid}>
+            {VOCAB_FEATURES.map((f) => {
               const Icon = f.icon
               return (
                 <Link key={f.title} href={f.href} className={`glassPanel ${styles.tile} ${styles[f.tone]}`}>

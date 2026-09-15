@@ -67,11 +67,16 @@
 /* ---- FEATURES ---- */
 .features { max-width: 980px; margin: 0 auto; padding: 0 20px 56px; }
 .featureGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pillarGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.vocabGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .tile {
   display: block; text-decoration: none; padding: 20px 20px 18px;
   transition: transform 0.18s ease, border-color 0.18s ease;
 }
 .tile:hover { transform: translateY(-3px); border-color: var(--hover-border); }
+.tileLg { padding: 28px 26px 24px; }
+.tileLg h3 { font-size: 1.1rem; }
+.tileLg p { font-size: 0.85rem; }
 .tileIcon {
   width: 40px; height: 40px; border-radius: 12px; margin-bottom: 14px;
   display: flex; align-items: center; justify-content: center;
@@ -146,12 +151,15 @@
 
 @media (max-width: 760px) {
   .featureGrid { grid-template-columns: 1fr 1fr; }
+  .vocabGrid { grid-template-columns: 1fr 1fr; }
+  .pillarGrid { grid-template-columns: 1fr; }
   .stepsGrid { grid-template-columns: 1fr 1fr; }
   .statRow { grid-template-columns: 1fr 1fr; }
   .h1 { font-size: 2rem; }
 }
 @media (max-width: 460px) {
   .featureGrid { grid-template-columns: 1fr; }
+  .vocabGrid { grid-template-columns: 1fr; }
   .stepsGrid { grid-template-columns: 1fr; }
   .statRow { grid-template-columns: 1fr 1fr; }
 }
