@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import styles from './essays.module.css'
 import GlassBackground from '@/components/GlassBackground'
+import WritingTabs from '@/components/WritingTabs'
 import { IconEssay, IconSearch, IconX, IconSave, IconCheck } from '@/components/Icons'
 
 const API = 'https://develop-uz-api.onrender.com'
@@ -173,6 +174,8 @@ export default function EssaysPage() {
           </h1>
           <p className={styles.desc}>Band 6-9 gacha real IELTS Writing Task 2 essaylar</p>
         </div>
+
+        <WritingTabs />
 
         <div className={styles.columns}>
           {/* PANEL 1 — Essay ro'yxati */}

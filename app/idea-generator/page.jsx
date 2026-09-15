@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import GlassBackground from '@/components/GlassBackground'
+import WritingTabs from '@/components/WritingTabs'
 import {
   IconFlame, IconCheck, IconX, IconTarget, IconWord, IconLayers,
   IconPencil, IconArrowRight, IconSend,
@@ -69,6 +70,8 @@ export default function IdeaGeneratorPage() {
           </h1>
           <p className={styles.desc}>Writing Task 2 mavzusini kiriting — AI argumentlar, vocabulary va outline beradi</p>
         </div>
+
+        <WritingTabs />
 
         <div className={`glassPanel ${styles.inputCard}`}>
           <div className={styles.inputLbl}>Writing Task 2 mavzusini yozing:</div>

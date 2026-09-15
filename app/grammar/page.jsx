@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import GlassBackground from '@/components/GlassBackground'
+import WritingTabs from '@/components/WritingTabs'
 import { IconGrammar, IconLock, IconX, IconPlus } from '@/components/Icons'
 import styles from './grammar.module.css'
 
@@ -178,6 +179,8 @@ export default function GrammarPage() {
           </h1>
           <p className={styles.desc}>Task 1 va Task 2 uchun Band 7–9 darajasidagi grammatik strukturalar</p>
         </div>
+
+        <WritingTabs />
 
         <div className={`glassPanel ${styles.filterBar}`}>
           <div className={styles.filterRow}>

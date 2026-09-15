@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import GlassBackground from '@/components/GlassBackground'
+import WritingTabs from '@/components/WritingTabs'
 import {
   IconTrophy, IconClock, IconEssay, IconLock, IconBot, IconSend,
   IconCheck, IconTarget, IconX, IconRefresh,
@@ -146,6 +147,8 @@ export default function MockPage() {
             <p className={styles.desc}>Haqiqiy IELTS sharoitida yozing — vaqt, mavzu, AI baho</p>
           </div>
 
+          <WritingTabs />
+
           <div className={`glassPanel ${styles.introCard}`}>
             <h2 className={styles.introHeading}>Imtihon boshlamishdan oldin</h2>
 
@@ -242,6 +245,8 @@ export default function MockPage() {
             </h1>
             <p className={styles.desc}>AI baholash yakunlandi</p>
           </div>
+
+          <WritingTabs />
 
           {loading ? (
             <div className={styles.centerBox}>AI baholamoqda...</div>

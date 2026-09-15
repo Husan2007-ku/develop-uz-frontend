@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import GlassBackground from '@/components/GlassBackground'
+import WritingTabs from '@/components/WritingTabs'
 import {
   IconBot, IconEssay, IconPencil, IconSearch, IconCheck, IconX,
   IconTarget, IconRefresh, IconSend, IconClock, IconArrowRight, IconChart,
@@ -23,6 +24,8 @@ export default function AIEssayPage() {
           </h1>
           <p className={styles.desc}>Essayingizni AI yordamida tahlil qiling yoki yangi essay yozing</p>
         </div>
+
+        <WritingTabs />
 
         {!mode && (
           <div className={styles.modeGrid}>
