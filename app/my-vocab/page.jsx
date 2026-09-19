@@ -1,6 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import GlassBackground from '@/components/GlassBackground'
+import { useAuth } from '@/lib/auth-context'
+import { authHeaders } from '@/lib/api'
 import {
   IconBook, IconRepeat, IconSearch, IconTarget, IconEye, IconCheck,
   IconX, IconPlus, IconArrowRight, IconRefresh,
@@ -8,7 +11,6 @@ import {
 import styles from './my-vocab.module.css'
 
 const API = 'https://develop-uz-api.onrender.com'
-const TELEGRAM_ID = 7311844154
 
 const STATUS_TONE = {
   new: { label: 'Yangi', bg: 'var(--t-blue)', fg: 'var(--on-blue)' },
@@ -25,6 +27,7 @@ const LEVEL_TONE = {
 function levelTone(l) { return LEVEL_TONE[l] || LEVEL_TONE.B2 }
 
 export default function MyVocabPage() {
+  const { telegramId } = useAuth()
   const [tab, setTab] = useState('my_vocab')
   const [words, setWords] = useState([])
   const [loading, setLoading] = useState(true)
@@ -42,12 +45,15 @@ export default function MyVocabPage() {
   const [reviewDone, setReviewDone] = useState(false)
   const [reviewScore, setReviewScore] = useState({ correct: 0, wrong: 0 })
 
-  useEffect(() => { loadMyVocab() }, [])
+  useEffect(() => {
+    if (telegramId) loadMyVocab()
+    else setLoading(false)
+  }, [telegramId])
 
   async function loadMyVocab() {
     setLoading(true)
     try {
-      const res = await fetch(`${API}/vocabulary/user/${TELEGRAM_ID}`)
+      const res = await fetch(`${API}/vocabulary/user/${telegramId}`, { headers: authHeaders() })
       const data = await res.json()
       setWords(data.words || [])
       setSavedIds(new Set((data.words || []).map(w => w.id)))
@@ -58,14 +64,14 @@ export default function MyVocabPage() {
   }
 
   async function saveWord(word) {
-    if (savedIds.has(word.id)) return
+    if (savedIds.has(word.id) || !telegramId) return
     setSavingId(word.id)
     try {
       const res = await fetch(`${API}/vocabulary/user/add`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
-          telegram_id: TELEGRAM_ID,
+          telegram_id: telegramId,
           vocab_id: word.id,
           source: 'manual'
         })
@@ -134,6 +140,13 @@ export default function MyVocabPage() {
           <p className={styles.desc}>Saqlagan so'zlaringiz, takrorlash jadvali va yangi so'z qidirish</p>
         </div>
 
+        {!telegramId ? (
+          <div className={`glassPanel ${styles.emptyState || ''}`} style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <p style={{ marginBottom: 16 }}>Shaxsiy vocabularyingizni ko&apos;rish uchun tizimga kiring</p>
+            <Link href="/login" className={styles.tab}>Kirish</Link>
+          </div>
+        ) : (
+        <>
         <div className={styles.tabRow}>
           {[
             { id: 'my_vocab', label: `Mening so'zlarim (${words.length})` },
@@ -410,6 +423,8 @@ export default function MyVocabPage() {
               </div>
             )}
           </div>
+        )}
+        </>
         )}
       </div>
     </div>

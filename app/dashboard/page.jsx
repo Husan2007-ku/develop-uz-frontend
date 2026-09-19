@@ -21,7 +21,7 @@ const STATS = [
 const MODULES = [
   {
     key: 'writing', title: 'Yozish', desc: "Insholaringizni AI orqali Band 6-9 mezonida tahlil qiling.",
-    href: '/essays', icon: IconPencil, tone: 'cBlue', progress: 68, status: '17/25 dars',
+    href: '/writing', icon: IconPencil, tone: 'cBlue', progress: 68, status: '17/25 dars',
   },
   {
     key: 'speaking', title: 'Gapirish', desc: 'Speaking mavzulari bo’yicha ovozli mashqlar va fikr-mulohaza.',

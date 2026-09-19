@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import styles from './speaking.module.css'
 import GlassBackground from '@/components/GlassBackground'
-import { IconMic, IconArrowRight, IconStar, IconTrophy, IconCheck, IconEye, IconChart } from '@/components/Icons'
+import { IconMic, IconArrowRight, IconStar, IconTrophy, IconCheck, IconEye, IconChart, IconLayers } from '@/components/Icons'
 
 const SPEAKING_DATA = {
   1: [
@@ -145,7 +145,28 @@ const SPEAKING_DATA = {
   ],
 }
 
+// Speaking'ning kirish eshigi — Part 1/2/3 endi kartochka sifatida tanlanadi,
+// navbar'dan kirganda darhol Part 1 savollari ochilib ketmaydi.
+const PART_INFO = [
+  {
+    part: 1, Icon: IconStar, title: 'Part 1', sub: 'Shaxsiy savollar',
+    desc: "Kundalik va shaxsiy mavzularda qisqa savol-javoblar — imtihon shu bosqichdan boshlanadi.",
+    tone: 'var(--t-blue)', on: 'var(--on-blue)',
+  },
+  {
+    part: 2, Icon: IconLayers, title: 'Part 2', sub: 'Cue Card',
+    desc: "Berilgan mavzu bo'yicha 1-2 daqiqa uzluksiz gapirish — tayyorgarlikka 1 daqiqa beriladi.",
+    tone: 'var(--t-orange)', on: 'var(--on-orange)',
+  },
+  {
+    part: 3, Icon: IconChart, title: 'Part 3', sub: 'Munozara',
+    desc: "Part 2 mavzusi bo'yicha chuqurroq, mavhumroq savollar — fikringizni asoslab bering.",
+    tone: 'var(--t-violet)', on: 'var(--on-violet)',
+  },
+]
+
 export default function SpeakingPage() {
+  const [stage, setStage] = useState('hub') // hub | practice
   const [part, setPart] = useState(1)
   const [selectedQ, setSelectedQ] = useState(null)
   const [bandView, setBandView] = useState('band7')
@@ -191,6 +212,30 @@ export default function SpeakingPage() {
           </h1>
           <p className={styles.desc}>Part 1, 2, 3 uchun namuna javoblar — Band 7 va Band 9 darajasida</p>
         </div>
+
+        {stage === 'hub' && (
+          <div className={styles.hubGrid}>
+            {PART_INFO.map((p) => (
+              <div
+                key={p.part}
+                className={`glassPanel ${styles.hubCard}`}
+                onClick={() => { setPart(p.part); setSelectedQ(null); setStage('practice') }}
+              >
+                <span className={styles.hubCardIcon} style={{ background: p.tone, color: p.on }}>
+                  <p.Icon />
+                </span>
+                <div className={styles.hubCardTitle}>{p.title} <span className={styles.hubCardSub}>{p.sub}</span></div>
+                <div className={styles.hubCardDesc}>{p.desc}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {stage === 'practice' && (
+        <>
+        <button className={styles.hubBackBtn} onClick={() => { setStage('hub'); setSelectedQ(null) }}>
+          <IconArrowRight style={{ transform: 'scaleX(-1)' }} /> Bo&apos;limlar
+        </button>
 
         <div className={styles.partTabs}>
           {[1, 2, 3].map(p => (
@@ -314,6 +359,8 @@ export default function SpeakingPage() {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   )

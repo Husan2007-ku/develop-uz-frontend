@@ -23,6 +23,7 @@
   --t-violet: rgba(145, 104, 240, 0.18); --on-violet: #c3a8ff;
   --t-orange: rgba(255, 171, 64, 0.18); --on-orange: #ffcb8a;
   --t-green: rgba(53, 208, 160, 0.18); --on-green: #6fe3bd;
+  --t-red: rgba(255, 92, 92, 0.18); --on-red: #ff9b9b;
   --t-gray: rgba(255, 255, 255, 0.06); --on-gray: #8b8f97;
 
   --ring-track: rgba(255, 255, 255, 0.14);
@@ -58,6 +59,7 @@
   --t-violet: #f1ebfc; --on-violet: #6d3fd1;
   --t-orange: #fff2e0; --on-orange: #b8690f;
   --t-green: #e4f5e7; --on-green: #2a7a3b;
+  --t-red: #fde9e9; --on-red: #c0392b;
   --t-gray: #eef0f3; --on-gray: #9aa0ab;
 
   --ring-track: rgba(20, 15, 40, 0.09);

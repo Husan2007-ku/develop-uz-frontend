@@ -2,13 +2,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import GlassBackground from '@/components/GlassBackground'
+import { useAuth } from '@/lib/auth-context'
+import { authHeaders } from '@/lib/api'
 import {
   IconSearch, IconSend, IconCheck, IconX, IconArrowRight, IconBook,
 } from '@/components/Icons'
 import styles from './sample-collector.module.css'
 
 const API = 'https://develop-uz-api.onrender.com'
-const TELEGRAM_ID = 7311844154
 
 const HL_TONE = {
   collocation: { bg: 'var(--t-orange)', fg: 'var(--on-orange)', label: 'Collocation' },
@@ -33,6 +34,7 @@ const SAMPLE_TEXTS = [
 ]
 
 export default function SampleCollectorPage() {
+  const { telegramId } = useAuth()
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [highlights, setHighlights] = useState([])
@@ -70,6 +72,16 @@ export default function SampleCollectorPage() {
     if (savedWords.find(w => w.text === key)) return
     setSavingId(key)
 
+    // Tizimga kirmagan bo'lsa — tahlil hammaga ochiq qoladi, faqat
+    // vocabularyga doimiy saqlash uchun login kerak. Backend so'rovini
+    // yubormaymiz, lekin ekranda "saqlangan" ko'rinishini beramiz va
+    // login taklif qilamiz.
+    if (!telegramId) {
+      setSavedWords(prev => [...prev, { ...hl, saved: false, needsLogin: true }])
+      setSavingId(null)
+      return
+    }
+
     try {
       // 1. Vocabulary da qidirish
       const searchRes = await fetch(`${API}/vocabulary/search/${encodeURIComponent(hl.text)}`)
@@ -80,9 +92,9 @@ export default function SampleCollectorPage() {
         const word = searchData.results[0]
         await fetch(`${API}/vocabulary/user/add`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({
-            telegram_id: TELEGRAM_ID,
+            telegram_id: telegramId,
             vocab_id: word.id,
             source: 'sample'
           })
@@ -329,6 +341,11 @@ export default function SampleCollectorPage() {
                           <span key={i} className={styles.savedChip}>{w.text}</span>
                         ))}
                       </div>
+                      {!telegramId && (
+                        <div className={styles.savedEmpty} style={{ marginTop: 8 }}>
+                          Doimiy saqlash uchun <Link href="/login">tizimga kiring</Link> — hozircha faqat shu sahifada ko'rinadi
+                        </div>
+                      )}
                       <button
                         className={`${styles.saveAllBtn} ${saveSuccess ? styles.saveAllBtnSuccess : ''}`}
                         onClick={saveAllToVocab}

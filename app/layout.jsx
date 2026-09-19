@@ -2,6 +2,7 @@ import { Rubik, Roboto, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import { ThemeProvider } from '@/lib/theme-context'
+import { AuthProvider } from '@/lib/auth-context'
 
 const rubik = Rubik({
   subsets: ['latin'],
@@ -42,8 +43,10 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen">
         <ThemeProvider>
-          <Navbar />
-          {children}
+          <AuthProvider>
+            <Navbar />
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

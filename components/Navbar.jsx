@@ -2,27 +2,30 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTheme } from '@/lib/theme-context'
+import { useAuth } from '@/lib/auth-context'
 import styles from './Navbar.module.css'
 import {
   IconPencil, IconCards, IconMic, IconGrid,
   IconArrowRight, IconSun, IconMoon,
 } from '@/components/Icons'
 
-// Har biri BITTA kirish eshigi — ichki sahifalar (Grammar, Mock, Idea
-// Generator, AI Tahlil...) endi /essays sahifasining o'zi ichida ochiladi,
-// nav'da dropdown shart emas. Vocabulary'ning barcha sahifalari esa bosh
-// sahifada (/) kartochka sifatida ko'rsatiladi — bu yerda faqat bitta link.
+// Har biri BITTA kirish eshigi. "Writing" bosilganda to'g'ridan-to'g'ri biror
+// ichki sahifa (masalan /essays) ochilib ketmasin deb, avval kartochkali hub
+// sahifa (/writing) ko'rsatiladi — foydalanuvchi o'zi kerakli bo'limni tanlaydi.
+// Vocabulary'ning barcha sahifalari esa bosh sahifada (/) kartochka sifatida
+// ko'rsatiladi — bu yerda faqat bitta link.
 const navGroups = [
-  { label: 'Writing', href: '/essays', icon: IconPencil },
-  { label: 'Speaking', href: '/speaking', icon: IconMic },
-  { label: 'Vocabulary', href: '/vocabulary', icon: IconCards },
-  { label: 'Dashboard', href: '/dashboard', icon: IconGrid },
+  { label: 'Writing', href: '/writing', icon: IconPencil, matches: ['/writing', '/essays', '/grammar', '/idea-generator', '/ai-essay', '/mock'] },
+  { label: 'Speaking', href: '/speaking', icon: IconMic, matches: ['/speaking'] },
+  { label: 'Vocabulary', href: '/vocabulary', icon: IconCards, matches: ['/vocabulary'] },
+  { label: 'Dashboard', href: '/dashboard', icon: IconGrid, matches: ['/dashboard'] },
 ]
 
 export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const { theme, setTheme } = useTheme()
+  const { user, logout } = useAuth()
   const isHome = pathname === '/'
 
   // Dashboard o'zining mustaqil (glass) header'iga ega, shuning uchun
@@ -53,7 +56,7 @@ export default function Navbar() {
       <div className={styles.center}>
         {navGroups.map((group) => {
           const Icon = group.icon
-          const active = pathname.startsWith(group.href)
+          const active = group.matches.some((m) => pathname.startsWith(m))
           return (
             <Link
               key={group.href}
@@ -77,6 +80,13 @@ export default function Navbar() {
           <IconMoon hidden={theme === 'light'} />
           <IconSun hidden={theme === 'dark'} />
         </button>
+        {user ? (
+          <button type="button" onClick={() => { logout(); router.push('/') }} className={styles.homeChip}>
+            {user.name} · Chiqish
+          </button>
+        ) : (
+          <Link href="/login" className={styles.homeChip}>Kirish</Link>
+        )}
       </div>
     </nav>
   )

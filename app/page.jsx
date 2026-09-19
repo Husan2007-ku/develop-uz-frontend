@@ -1,47 +1,50 @@
+'use client'
 import Link from 'next/link'
-import styles from './Home.module.css'
 import GlassBackground from '@/components/GlassBackground'
+import styles from './Home.module.css'
 import {
-  IconPencil, IconCards, IconMic, IconRepeat, IconBot, IconBook, IconSearch,
-  IconEssay, IconWord, IconChart, IconTelegram, IconCheck, IconArrowRight,
+  IconPencil, IconMic, IconCards, IconBook, IconRepeat, IconSearch,
+  IconEssay, IconWord, IconLayers, IconBot, IconTelegram, IconCheck,
+  IconArrowRight, IconSend,
 } from '@/components/Icons'
 
-// Ikki asosiy yo'nalish — har biri BITTA eshik. Ichkarida (Essays sahifasi
-// ichida Grammar/Idea Generator/AI Tahlil/Mock, Speaking sahifasi ichida
-// qolgan bosqichlar) o'zi ochiladi, bosh sahifada faqat shu ikkitasi turadi.
+// Ikki asosiy yo'nalish — har biri BITTA eshik, lekin to'g'ridan-to'g'ri ichki
+// sahifaga emas, avval kartochkali hub'ga olib boradi (Writing → /writing,
+// Speaking → /speaking'ning o'zi Part 1/2/3 kartochkalari bilan hub vazifasini
+// bajaradi). Bosh sahifada faqat shu ikkitasi turadi.
 const PILLARS = [
   {
-    icon: IconPencil, tag: 'Essays · Grammar · AI Tahlil · Mock', title: 'Writing',
+    Icon: IconPencil, tag: 'Essays · Grammar · AI Tahlil · Mock', title: 'Writing',
     desc: 'Band 8+ sample essaylar, AI tahlil, grammar strukturalar va mock imtihon — hammasi bitta joyda.',
-    href: '/essays', tone: 'cBlue',
+    href: '/writing', tone: 'cBlue',
   },
   {
-    icon: IconMic, tag: 'Part 1 · 2 · 3', title: 'Speaking',
+    Icon: IconMic, tag: 'Part 1 · 2 · 3', title: 'Speaking',
     desc: "Savol tanla, AI bilan gaplash, ball ol va o'sha yerdan yangi so'z/struktura yodla.",
-    href: '/speaking', tone: 'cViolet',
+    href: '/speaking', tone: 'cOrange',
   },
 ]
 
-// Vocabulary — alohida hub emas, mavjud sahifalarning barchasi bosh sahifada
+// Vocabulary — alohida hub emas, bor sahifalarning barchasi bosh sahifada
 // to'g'ridan-to'g'ri ko'rinadi (nav'dagi dropdown'dan shu yerga ko'chirildi).
 const VOCAB_FEATURES = [
   {
-    icon: IconCards, tag: 'B2 · C1 · C2', title: 'Vocabulary Zone',
+    Icon: IconCards, tag: 'B2 · C1 · C2', title: 'Vocabulary Zone',
     desc: "10,000+ so'z CEFR darajalari bilan. O'zbek tarjimasi, misol jumlalar, word family.",
     href: '/vocabulary', tone: 'cGreen',
   },
   {
-    icon: IconBook, tag: 'Shaxsiy', title: 'Mening Vocabularyim',
+    Icon: IconBook, tag: 'Shaxsiy', title: 'Mening Vocabularyim',
     desc: "O'zingiz saqlagan so'z va grammatikalar — Writing/Speaking'dan avtomatik tushganlari ham shu yerda.",
     href: '/my-vocab', tone: 'cBlue',
   },
   {
-    icon: IconRepeat, tag: 'SM-2 algoritm', title: 'Flashcard & Study',
+    Icon: IconRepeat, tag: 'SM-2 algoritm', title: 'Flashcard & Study',
     desc: "Spaced Repetition usulida so'z yodlash. Cloze test, quiz va writing practice.",
     href: '/study', tone: 'cOrange',
   },
   {
-    icon: IconSearch, tag: 'Beta', title: 'Sample Collector',
+    Icon: IconSearch, tag: 'Beta', title: 'Sample Collector',
     desc: "Namuna essay/javoblardan so'z va struktura yig'ish vositasi.",
     href: '/sample-collector', tone: 'cViolet',
   },
@@ -55,10 +58,17 @@ const STEPS = [
 ]
 
 const STATS = [
-  { icon: IconEssay, value: '1000+', label: 'Writing Essay', tone: 'blue' },
-  { icon: IconWord, value: '10,000+', label: 'Vocabulary', tone: 'green' },
-  { icon: IconChart, value: 'B2→C2', label: 'CEFR darajalar', tone: 'orange' },
-  { icon: IconBot, value: 'AI', label: 'Essay tahlili', tone: 'violet' },
+  { n: '1000+', label: 'Writing Essay', Icon: IconEssay, tone: 'blue' },
+  { n: '10,000+', label: 'Vocabulary', Icon: IconWord, tone: 'orange' },
+  { n: 'B2→C2', label: 'CEFR darajalar', Icon: IconLayers, tone: 'green' },
+  { n: 'AI', label: 'Essay tahlili', Icon: IconBot, tone: 'violet' },
+]
+
+const CHECKLIST = [
+  'Kunlik vocabulary eslatmalar',
+  'Ebbinghaus Forgetting Curve asosida',
+  'Flashcard va testlar',
+  'Bepul foydalanish',
 ]
 
 const TONE_VARS = {
@@ -72,49 +82,48 @@ export default function Home() {
   return (
     <div className={styles.wrapper}>
       <GlassBackground />
-
       <div className={styles.inner}>
+
         {/* HERO */}
         <section className={styles.hero}>
-          <span className={styles.badge}>
+          <div className={styles.badge}>
             <span className={styles.badgeDot} />
             Writing · Speaking · Vocabulary — O&apos;zbek tilida
-          </span>
+          </div>
 
           <h1 className={styles.h1}>
-            IELTS <span className={styles.h1Gradient}>Writing va Vocabulary</span>
+            IELTS <span className={styles.h1Gradient}>Writing</span> va Vocabulary
             <br />uchun yagona platforma
           </h1>
 
           <p className={styles.lead}>
-            Band 8+ essaylar, 10,000+ CEFR darajali so&apos;zlar, AI tahlil — hammasi{' '}
-            <b>o&apos;zbek tilida</b>
+            Band 8+ essaylar, 10,000+ CEFR darajali so&apos;zlar,
+            AI tahlil — hammasi <b>o&apos;zbek tilida</b>
           </p>
 
           <div className={styles.ctaRow}>
             <Link href="/essays" className={styles.btnPrimary}>
-              <IconPencil size={16} /> Essaylarni ko&apos;rish
+              <IconEssay /> Essaylarni ko&apos;rish
             </Link>
             <Link href="/vocabulary" className={styles.btnGhost}>
-              <IconCards size={16} /> Vocabulary
+              <IconCards /> Vocabulary
             </Link>
             <Link href="/ai-essay" className={styles.btnGhost}>
-              <IconBot size={16} /> AI Tahlil
+              <IconBot /> AI Tahlil
             </Link>
           </div>
         </section>
 
         {/* STATS */}
         <div className={styles.statRow}>
-          {STATS.map((s) => {
-            const Icon = s.icon
+          {STATS.map((s, i) => {
             const tone = TONE_VARS[s.tone]
             return (
-              <div key={s.label} className={`glassPanel ${styles.statChip}`}>
+              <div key={i} className={`glassPanel ${styles.statChip}`}>
                 <span className={styles.statIcon} style={{ background: tone.bg, color: tone.on }}>
-                  <Icon size={16} />
+                  <s.Icon size={17} />
                 </span>
-                <div className={styles.statV} style={{ color: tone.on }}>{s.value}</div>
+                <div className={styles.statV}>{s.n}</div>
                 <div className={styles.statLbl}>{s.label}</div>
               </div>
             )
@@ -122,56 +131,56 @@ export default function Home() {
         </div>
 
         {/* ASOSIY YO'NALISHLAR — Writing va Speaking, har biri bitta eshik */}
-        <section className={styles.features}>
+        <div className={styles.features}>
           <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>Faqat <span>kerakli narsalar</span></h2>
+            <h2 className={styles.sectionTitle}>
+              Faqat <span>kerakli narsalar</span>
+            </h2>
             <p className={styles.sectionDesc}>Writing va Speaking — ortiqcha hech narsa yo&apos;q</p>
           </div>
           <div className={styles.pillarGrid}>
-            {PILLARS.map((f) => {
-              const Icon = f.icon
-              return (
-                <Link key={f.title} href={f.href} className={`glassPanel ${styles.tile} ${styles.tileLg} ${styles[f.tone]}`}>
-                  <span className={styles.tileIcon}><Icon size={22} /></span>
-                  <span className={styles.tileTag}>{f.tag}</span>
-                  <h3>{f.title}</h3>
-                  <p>{f.desc}</p>
-                </Link>
-              )
-            })}
+            {PILLARS.map((f, i) => (
+              <Link key={i} href={f.href} className={`glassPanel ${styles.tile} ${styles.tileLg} ${styles[f.tone]}`}>
+                <span className={styles.tileIcon}><f.Icon /></span>
+                <span className={styles.tileTag}>{f.tag}</span>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </Link>
+            ))}
           </div>
-        </section>
+        </div>
 
         {/* VOCABULARY — nav dropdown'dan bosh sahifaga ko'chirildi, hammasi ochiq */}
-        <section className={styles.features}>
+        <div className={styles.features}>
           <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}><span>Vocabulary</span></h2>
+            <h2 className={styles.sectionTitle}>
+              <span>Vocabulary</span>
+            </h2>
             <p className={styles.sectionDesc}>Writing va Speaking&apos;dan chiqqan so&apos;zlar ham avtomatik shu yerga tushadi</p>
           </div>
           <div className={styles.vocabGrid}>
-            {VOCAB_FEATURES.map((f) => {
-              const Icon = f.icon
-              return (
-                <Link key={f.title} href={f.href} className={`glassPanel ${styles.tile} ${styles[f.tone]}`}>
-                  <span className={styles.tileIcon}><Icon size={20} /></span>
-                  <span className={styles.tileTag}>{f.tag}</span>
-                  <h3>{f.title}</h3>
-                  <p>{f.desc}</p>
-                </Link>
-              )
-            })}
+            {VOCAB_FEATURES.map((f, i) => (
+              <Link key={i} href={f.href} className={`glassPanel ${styles.tile} ${styles[f.tone]}`}>
+                <span className={styles.tileIcon}><f.Icon size={18} /></span>
+                <span className={styles.tileTag}>{f.tag}</span>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </Link>
+            ))}
           </div>
-        </section>
+        </div>
 
         {/* HOW IT WORKS */}
-        <section className={styles.stepsSection}>
+        <div className={styles.stepsSection}>
           <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>Qanday <span>ishlaydi?</span></h2>
+            <h2 className={styles.sectionTitle}>
+              Qanday <span>ishlaydi?</span>
+            </h2>
             <p className={styles.sectionDesc}>4 qadam bilan Band 8+ ga yeting</p>
           </div>
           <div className={styles.stepsGrid}>
             {STEPS.map((s, i) => (
-              <div key={s.n} className={`glassPanel ${styles.step}`}>
+              <div key={i} className={`glassPanel ${styles.step}`}>
                 <div className={styles.stepN}>{s.n}</div>
                 <h3>{s.title}</h3>
                 <p>{s.desc}</p>
@@ -181,61 +190,61 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </section>
+        </div>
 
         {/* TELEGRAM */}
-        <section className={styles.telegram}>
+        <div className={styles.telegram}>
           <div className={`glassPanel ${styles.telegramCard}`}>
             <div className={styles.telegramText}>
-              <span className={styles.telegramBadge}><IconTelegram /> Telegram Bot</span>
+              <div className={styles.telegramBadge}><IconTelegram /> Telegram Bot</div>
               <div className={styles.telegramTitle}>Telegramda ham o&apos;rganing!</div>
-              <p className={styles.telegramDesc}>
+              <div className={styles.telegramDesc}>
                 Kunlik 10 ta yangi so&apos;z, flashcard va eslatmalar — Ebbinghaus Forgetting Curve asosida.
-              </p>
+              </div>
               <div className={styles.checkList}>
-                {[
-                  'Kunlik vocabulary eslatmalar',
-                  'Ebbinghaus Forgetting Curve asosida',
-                  'Flashcard va testlar',
-                  'Bepul foydalanish',
-                ].map((item) => (
-                  <span key={item} className={styles.checkItem}>
-                    <IconCheck /> {item}
-                  </span>
+                {CHECKLIST.map((item, i) => (
+                  <span key={i} className={styles.checkItem}><IconCheck /> {item}</span>
                 ))}
               </div>
             </div>
             <div className={styles.telegramActions}>
-              <Link href="https://t.me/IeLtsEssay_platfom_bot" target="_blank" className={styles.btnPrimary}>
-                <IconTelegram size={16} /> Botga o&apos;tish
+              <Link href="https://t.me/IeLtsEssay_platfom_bot" target="_blank" className={styles.btnGhost}>
+                <IconTelegram /> Botga o&apos;tish <IconArrowRight />
               </Link>
-              <Link href="/essays" className={styles.btnGhost}>Saytda davom etish</Link>
+              <Link href="/essays" className={styles.btnGhost}>
+                Saytda davom etish
+              </Link>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* FINAL CTA */}
-        <section className={styles.finalCta}>
+        {/* CTA */}
+        <div className={styles.finalCta}>
           <div className={`glassPanel ${styles.finalCtaCard}`}>
-            <h2>Bugun boshlang!</h2>
+            <h2>Bugun boshlang! 🚀</h2>
             <p>O&apos;zbek tilidagi yagona professional IELTS Writing platformasi</p>
             <Link href="/essays" className={styles.btnPrimary}>
-              Bepul boshlash <IconArrowRight size={16} />
+              <IconSend /> Bepul boshlash
             </Link>
           </div>
-        </section>
+        </div>
 
         {/* FOOTER */}
         <footer className={styles.footer}>
-          <span className={styles.footerBrand}>
-            <span className={styles.footerDot} /> Develop UZ
-          </span>
+          <div className={styles.footerBrand}>
+            <span className={styles.footerDot} />
+            Develop UZ
+          </div>
           <span>Writing · Speaking · Vocabulary — O&apos;zbek tilida</span>
           <div className={styles.footerLinks}>
-            <Link href="/essays">Essays</Link>
-            <Link href="/vocabulary">Vocabulary</Link>
-            <Link href="/study">Study</Link>
-            <Link href="/ai-essay">AI Tahlil</Link>
+            {[
+              { href: '/essays', label: 'Essays' },
+              { href: '/vocabulary', label: 'Vocabulary' },
+              { href: '/study', label: 'Study' },
+              { href: '/ai-essay', label: 'AI Tahlil' },
+            ].map(l => (
+              <Link key={l.href} href={l.href}>{l.label}</Link>
+            ))}
           </div>
         </footer>
       </div>

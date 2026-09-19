@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react'
 import styles from './essays.module.css'
 import GlassBackground from '@/components/GlassBackground'
 import WritingTabs from '@/components/WritingTabs'
+import { useAuth } from '@/lib/auth-context'
+import { authHeaders } from '@/lib/api'
 import { IconEssay, IconSearch, IconX, IconSave, IconCheck } from '@/components/Icons'
 
 const API = 'https://develop-uz-api.onrender.com'
-const TELEGRAM_ID = 7311844154
 
 const TONE = {
   green: { bg: 'var(--t-green)', on: 'var(--on-green)' },
@@ -37,6 +38,7 @@ const HL_COLORS = {
 }
 
 export default function EssaysPage() {
+  const { telegramId } = useAuth()
   const [essays, setEssays] = useState([])
   const [selected, setSelected] = useState(null)
   const [highlights, setHighlights] = useState([])
@@ -67,10 +69,17 @@ export default function EssaysPage() {
       const data = await res.json()
       setSelected(data)
       setHighlights(data.highlights || [])
-      const notesRes = await fetch(`${API}/essays/${essay.id}/notes/${TELEGRAM_ID}`)
-      const notes = await notesRes.json()
-      setVocabNotes(notes.vocab_notes || '')
-      setGrammarNotes(notes.grammar_notes || '')
+      if (telegramId) {
+        const notesRes = await fetch(`${API}/essays/${essay.id}/notes/${telegramId}`, {
+          headers: authHeaders(),
+        })
+        const notes = await notesRes.json()
+        setVocabNotes(notes.vocab_notes || '')
+        setGrammarNotes(notes.grammar_notes || '')
+      } else {
+        setVocabNotes('')
+        setGrammarNotes('')
+      }
       setSaved(false)
     } catch (e) {
       console.error(e)
@@ -103,11 +112,11 @@ export default function EssaysPage() {
   }
 
   async function saveNotes() {
-    if (!selected) return
+    if (!selected || !telegramId) return
     try {
-      await fetch(`${API}/essays/${selected.id}/notes/${TELEGRAM_ID}`, {
+      await fetch(`${API}/essays/${selected.id}/notes/${telegramId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ vocab_notes: vocabNotes, grammar_notes: grammarNotes })
       })
       setSaved(true)
@@ -325,13 +334,15 @@ export default function EssaysPage() {
             <div className={styles.notesFoot}>
               <button
                 onClick={saveNotes}
-                disabled={!selected}
+                disabled={!selected || !telegramId}
                 className={`${styles.saveBtn} ${saved ? styles.saveBtnSaved : ''}`}
               >
                 {saved ? <IconCheck size={14} /> : <IconSave size={14} />}
                 {saved ? 'Saqlandi!' : 'Saqlash'}
               </button>
-              <div className={styles.saveHint}>Bot orqali eslatiladi</div>
+              <div className={styles.saveHint}>
+                {telegramId ? 'Bot orqali eslatiladi' : 'Saqlash uchun tizimga kiring'}
+              </div>
             </div>
           </div>
         </div>
